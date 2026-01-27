@@ -1,12 +1,10 @@
 name: Update Academy Site
 
 on:
-  workflow_dispatch:      # يسمح لك بتشغيل السكريبت بضغطة زر
-  schedule:
-    - cron: '0 0 * * *'   # يشتغل لوحده كل يوم الساعة 12 بالليل
+  workflow_dispatch:
 
 permissions:
-  contents: write         # إذن عشان يقدر يعدل الملفات
+  contents: write
 
 jobs:
   build:
