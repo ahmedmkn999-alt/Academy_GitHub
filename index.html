@@ -1,140 +1,38 @@
-import requests
-from bs4 import BeautifulSoup
-import os
-from urllib.parse import urljoin
-import datetime
-
-# --- إعدادات الرابط ---
-TARGET_URL = "https://uploadi.vercel.app/cur.html"
-OUTPUT_FILE = "index.html"  # هذا الاسم ضروري لـ GitHub Pages
-
-# --- تصميم المنصة (سيتم حقن البيانات فيه) ---
-HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academy - المنصة التعليمية</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>جاري التجهيز...</title>
     <style>
-        :root {{ --primary: #0ea5e9; --dark: #0f172a; --card: #1e293b; --text: #f1f5f9; }}
-        body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--dark); color: var(--text); margin: 0; padding: 0; }}
-        
-        /* الهيدر */
-        header {{ background: linear-gradient(to right, #1e293b, #0f172a); padding: 2rem; text-align: center; border-bottom: 3px solid var(--primary); }}
-        h1 {{ margin: 0; font-size: 2.5rem; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; }}
-        p.subtitle {{ color: #94a3b8; margin-top: 10px; }}
-        
-        /* المحتوى */
-        .container {{ max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }}
-        .update-time {{ text-align: center; color: #64748b; font-size: 0.9rem; margin-bottom: 20px; }}
-        
-        .grid {{ display: grid; gap: 15px; }}
-        
-        /* كارت الفيديو */
-        .card {{
-            background: var(--card); padding: 1.5rem; border-radius: 12px;
-            display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
-            border: 1px solid #334155; transition: 0.3s; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }}
-        .card:hover {{ transform: translateY(-3px); border-color: var(--primary); }}
-        
-        .info {{ display: flex; align-items: center; gap: 15px; }}
-        .icon-box {{ width: 40px; height: 40px; background: rgba(14, 165, 233, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary); }}
-        .title {{ font-weight: bold; font-size: 1.1rem; }}
-        
-        .actions {{ margin-top: 10px; display: flex; gap: 10px; }}
-        
-        .btn {{
-            background: var(--primary); color: white; text-decoration: none;
-            padding: 10px 20px; border-radius: 8px; font-weight: bold;
-            display: inline-flex; align-items: center; gap: 8px; transition: 0.2s;
-        }}
-        .btn:hover {{ background: #0284c7; }}
-        .btn-play {{ background: #22c55e; }}
-        .btn-play:hover {{ background: #16a34a; }}
-
-        footer {{ text-align: center; padding: 2rem; color: #475569; margin-top: 2rem; border-top: 1px solid #1e293b; }}
+        body {
+            background-color: #0f172a;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Tahoma, sans-serif;
+        }
+        .loader {
+            border: 5px solid #1e293b;
+            border-top: 5px solid #3b82f6;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        h1 { margin: 0; font-size: 1.5rem; }
+        p { color: #94a3b8; }
     </style>
 </head>
 <body>
-
-    <header>
-        <h1><i class="fas fa-graduation-cap"></i> ACADEMY</h1>
-        <p class="subtitle">منصة المحتوى التعليمي المستخرج</p>
-    </header>
-
-    <div class="container">
-        <div class="update-time">آخر تحديث للمحتوى: {date}</div>
-        <div class="grid">
-            {content}
-        </div>
-    </div>
-
-    <footer>
-        All Rights Reserved &copy; 2024 Academy Platform
-    </footer>
-
+    <div class="loader"></div>
+    <h1>جاري إعداد المنصة...</h1>
+    <p>سيقوم الروبوت بجلب الفيديوهات قريباً.</p>
 </body>
 </html>
-"""
-
-def build_site():
-    print("🚀 جاري بدء عملية بناء المنصة...")
-    try:
-        # 1. سحب البيانات
-        headers = {'User-Agent': 'Mozilla/5.0'}
-        response = requests.get(TARGET_URL, headers=headers)
-        soup = BeautifulSoup(response.text, 'html.parser')
-        
-        cards_html = ""
-        count = 0
-        
-        # 2. تحليل الروابط
-        for link in soup.find_all('a'):
-            href = link.get('href')
-            text = link.text.strip()
-            
-            if href:
-                full_url = urljoin(TARGET_URL, href)
-                # شروط الفيديو (يمكن زيادتها)
-                is_video = any(full_url.lower().endswith(ext) for ext in ['.mp4', '.mkv', '.avi', '.mov'])
-                is_watch = "video" in full_url.lower() or "watch" in full_url.lower()
-                
-                if is_video or is_watch:
-                    count += 1
-                    name = text if text else f"محاضرة رقم {count}"
-                    
-                    # تصميم الكارت الواحد
-                    cards_html += f"""
-                    <div class="card">
-                        <div class="info">
-                            <div class="icon-box"><i class="fas fa-play"></i></div>
-                            <div class="title">{name}</div>
-                        </div>
-                        <div class="actions">
-                            <a href="{full_url}" class="btn" download target="_blank"><i class="fas fa-download"></i> تحميل</a>
-                            <a href="{full_url}" class="btn btn-play" target="_blank"><i class="fas fa-eye"></i> مشاهدة</a>
-                        </div>
-                    </div>
-                    """
-        
-        if count == 0:
-             cards_html = "<h3 style='text-align:center; color:#ef4444;'>⚠️ لم يتم العثور على روابط فيديوهات مباشرة. تأكد أن الموقع يعمل.</h3>"
-
-        # 3. دمج المحتوى مع التصميم
-        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-        final_html = HTML_TEMPLATE.format(content=cards_html, date=now)
-        
-        # 4. الحفظ
-        with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-            f.write(final_html)
-            
-        print(f"✅ تم بنجاح! تم استخراج {count} فيديو وإنشاء ملف {OUTPUT_FILE}")
-        
-    except Exception as e:
-        print(f"❌ خطأ: {e}")
-
-if __name__ == "__main__":
-    build_site()
