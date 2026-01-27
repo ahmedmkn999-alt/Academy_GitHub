@@ -1,196 +1,135 @@
 import undetected_chromedriver as uc
-from bs4 import BeautifulSoup
-from urllib.parse import urljoin
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import time
+import json
 import datetime
 from pyvirtualdisplay import Display
-import random
 
-# الرابط الرئيسي
-MAIN_URL = "https://coursatk.online/years"
+# الرابط المستهدف
+TARGET_URL = "https://coursatk.online/years"
 OUTPUT_FILE = "index.html"
 
-# --- تصميم المنصة (الخزنة) ---
+# --- تصميم منصة كشف الـ API ---
 HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academy - الخزنة</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Academy - API Hunter</title>
     <style>
-        :root {{ --primary: #fbbf24; --bg: #1a1a1a; --card: #2d2d2d; --text: #eaeaea; }}
-        body {{ font-family: Tahoma, sans-serif; background: var(--bg); color: var(--text); padding: 20px; }}
-        header {{ text-align: center; border-bottom: 2px solid var(--primary); padding-bottom: 20px; margin-bottom: 30px; }}
-        
-        .grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }}
-        .card {{ background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid #444; display: flex; flex-direction: column; }}
-        
-        .video-box {{ position: relative; padding-bottom: 56.25%; height: 0; background: #000; border-bottom: 1px solid #444; }}
-        .video-box iframe, .video-box video {{ position: absolute; top: 0; left: 0; width: 100%; height: 100%; }}
-        
-        .card-body {{ padding: 15px; flex-grow: 1; }}
-        .card-title {{ font-size: 1.1rem; color: var(--primary); font-weight: bold; margin-bottom: 10px; }}
-        .path {{ font-size: 0.8rem; color: #888; margin-bottom: 10px; }}
-        
-        .btn {{ display: block; background: #2563eb; color: white; text-align: center; padding: 10px; border-radius: 6px; text-decoration: none; font-weight: bold; margin-top: auto; }}
-        .btn:hover {{ background: #1d4ed8; }}
-        
-        .stats {{ background: #333; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; color: #aaa; font-family: monospace; }}
+        body {{ font-family: monospace; background: #0d1117; color: #c9d1d9; padding: 20px; }}
+        h1 {{ color: #58a6ff; text-align: center; border-bottom: 1px solid #30363d; padding-bottom: 10px; }}
+        .section {{ background: #161b22; border: 1px solid #30363d; border-radius: 6px; margin-bottom: 20px; padding: 15px; }}
+        .label {{ display: inline-block; padding: 2px 5px; border-radius: 4px; font-size: 0.8em; margin-left: 10px; font-weight: bold; }}
+        .json-tag {{ background: #d29922; color: #000; }}
+        .video-tag {{ background: #238636; color: #fff; }}
+        .url {{ word-break: break-all; color: #a5d6ff; display: block; margin-bottom: 5px; }}
+        .btn {{ display: inline-block; background: #21262d; color: #c9d1d9; text-decoration: none; padding: 5px 10px; border: 1px solid #30363d; border-radius: 6px; margin-top: 5px; }}
+        .btn:hover {{ background: #30363d; color: #58a6ff; }}
+        .raw-data {{ display: none; background: #000; padding: 10px; margin-top: 10px; border-left: 3px solid #58a6ff; white-space: pre-wrap; }}
     </style>
+    <script>
+        function toggleDetails(id) {{
+            var x = document.getElementById(id);
+            if (x.style.display === "none") {{ x.style.display = "block"; }} else {{ x.style.display = "none"; }}
+        }}
+    </script>
 </head>
 <body>
-    <header>
-        <h1>💎 ACADEMY VAULT</h1>
-        <p>تم استخراج الفيديوهات من العمق</p>
-    </header>
-
-    <div class="stats">
-        {stats}
-    </div>
-
-    <div class="grid">
+    <h1>📡 API & NETWORK SNIFFER</h1>
+    <p style="text-align:center">تم اعتراض الاتصالات الخلفية للموقع</p>
+    
+    <div id="results">
         {content}
     </div>
 </body>
 </html>
 """
 
-def deep_excavator():
-    # 1. إعداد الشاشة الوهمية والمتصفح
-    print("🚜 تشغيل الحفار...")
+def api_sniffer():
+    print("📡 تشغيل وضع التجسس على الشبكة...")
     display = Display(visible=0, size=(1920, 1080))
     display.start()
+
+    # تفعيل تسجيل الشبكة (Performance Logging)
+    caps = DesiredCapabilities.CHROME
+    caps['goog:loggingPrefs'] = {'performance': 'ALL'}
 
     options = uc.ChromeOptions()
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
-    options.add_argument('--disable-popup-blocking')
-    
+    # دمج القدرات مع الخيارات
+    options.set_capability('goog:loggingPrefs', {'performance': 'ALL'})
+
     driver = uc.Chrome(options=options)
     
-    extracted_data = [] # هنا هنخزن الفيديوهات اللي نلاقيها
-    visited_urls = set() # عشان مندخلش صفحة مرتين
-    urls_to_visit = [MAIN_URL] # القائمة اللي هيمشي عليها (طابور)
+    captured_requests = []
 
     try:
-        # 2. الدخول الأولي والانتظار اليدوي
-        print(f"🌍 الدخول للموقع: {MAIN_URL}")
-        driver.get(MAIN_URL)
+        print(f"🌍 الدخول للموقع: {TARGET_URL}")
+        driver.get(TARGET_URL)
         
-        print("⏳ معك 60 ثانية الآن! لو الموقع محتاج تسجيل دخول، ادخل بحسابك يدوياً...")
-        # هنا بنديك وقت لو عايز تعمل login
-        time.sleep(60) 
+        # ننتظر شوية عشان الموقع يحمل كل الـ APIs بتاعته
+        print("⏳ جاري تسجيل حركة المرور (30 ثانية)...")
+        time.sleep(30)
         
-        print("🚀 بدء الزحف العميق! (هياخد وقت، سيبه يشتغل)...")
+        # سحب سجلات الشبكة
+        logs = driver.get_log('performance')
+        print(f"📥 تم سحب {len(logs)} سجل شبكة. جاري التحليل...")
 
-        # 3. حلقة الزحف (Crawler Loop)
-        # هنلف بحد أقصى 50 صفحة عشان السيرفر ميفصلش (ممكن تزودها)
-        max_pages = 50 
-        pages_scanned = 0
-
-        while urls_to_visit and pages_scanned < max_pages:
-            current_url = urls_to_visit.pop(0) # خد أول رابط في الطابور
-            
-            if current_url in visited_urls:
-                continue
-            
+        for entry in logs:
             try:
-                print(f"[{pages_scanned+1}/{max_pages}] جاري فحص: {current_url}")
-                driver.get(current_url)
-                time.sleep(5) # استنى الصفحة تحمل
-                visited_urls.add(current_url)
-                pages_scanned += 1
-
-                soup = BeautifulSoup(driver.page_source, 'html.parser')
-                page_title = soup.title.text.strip() if soup.title else "بدون عنوان"
-
-                # --- أ. التفتيش عن فيديوهات في الصفحة دي ---
-                found_on_page = False
+                message = json.loads(entry['message'])['message']
                 
-                # 1. Iframes
-                for iframe in soup.find_all('iframe'):
-                    src = iframe.get('src')
-                    if src and ("youtube" in src or "vimeo" in src or "video" in src or "embed" in src):
-                        extracted_data.append({
-                            "type": "iframe", "src": src, "title": page_title, "origin": current_url
-                        })
-                        found_on_page = True
-                        print("   ✅ تم العثور على فيديو!")
-
-                # 2. Video Tags
-                for vid in soup.find_all('video'):
-                    src = vid.get('src')
-                    if src:
-                        full_src = urljoin(current_url, src)
-                        extracted_data.append({
-                            "type": "video", "src": full_src, "title": page_title, "origin": current_url
-                        })
-                        found_on_page = True
-                        print("   ✅ تم العثور على ملف فيديو!")
-
-                # --- ب. لو مفيش فيديو، دور على روابط تانية وضيفها للطابور ---
-                # (بس نضيف الروابط الداخلية فقط عشان ميسرحش في جوجل وفيسبوك)
-                if not found_on_page:
-                    links = soup.find_all('a', href=True)
-                    for link in links:
-                        href = link['href']
-                        full_link = urljoin(current_url, href)
+                # إحنا مهتمين بالردود اللي جاية من السيرفر (ResponseReceived)
+                if message['method'] == 'Network.responseReceived':
+                    response = message['params']['response']
+                    url = response['url']
+                    mime_type = response['mimeType']
+                    
+                    # فلترة: إحنا عايزين ملفات الفيديو أو الـ JSON (الـ API)
+                    is_api = "json" in mime_type or "xml" in mime_type
+                    is_video = "video" in mime_type or "mpeg" in mime_type or "mp4" in url or "m3u8" in url
+                    
+                    # استبعاد ملفات الموقع العادية (CSS, Images, Fonts)
+                    if (is_api or is_video) and "google" not in url and "facebook" not in url:
+                        tag_class = "json-tag" if is_api else "video-tag"
+                        tag_name = "API / DATA" if is_api else "MEDIA FILE"
                         
-                        # شروط الرابط عشان ندخله:
-                        # 1. يكون تبع الموقع (مش خارجي)
-                        # 2. ميكونش زرار خروج أو لوجين
-                        # 3. ميكونش شوفناه قبل كدة
-                        if "coursatk.online" in full_link and full_link not in visited_urls and full_link not in urls_to_visit:
-                            if not any(x in full_link for x in ["login", "logout", "register", "#", "contact"]):
-                                urls_to_visit.append(full_link)
+                        captured_requests.append(f"""
+                        <div class="section">
+                            <span class="label {tag_class}">{tag_name}</span>
+                            <span style="color:#8b949e; font-size:0.8em">{mime_type}</span>
+                            <a href="{url}" target="_blank" class="url">{url}</a>
+                            <button class="btn" onclick="toggleDetails('details_{len(captured_requests)}')">عرض التفاصيل</button>
+                            <a href="{url}" class="btn" target="_blank">فتح الرابط</a>
+                            <div id="details_{len(captured_requests)}" class="raw-data">
+                                Status: {response['status']} {response['statusText']}
+                                <br>Server IP: {response.get('remoteIPAddress', 'N/A')}
+                            </div>
+                        </div>
+                        """)
 
-            except Exception as e:
-                print(f"⚠️ خطأ في الصفحة: {e}")
+            except Exception:
+                continue
 
-        # 4. بناء ملف HTML النهائي
-        html_cards = ""
-        if not extracted_data:
-            html_cards = "<h2 style='text-align:center; padding:50px; color:#ef4444'>للأسف لم يتم العثور على فيديوهات حتى بعد البحث العميق.</h2>"
-        else:
-            for item in extracted_data:
-                media_html = ""
-                btn_text = ""
-                btn_link = item['src']
+        # حفظ التقرير
+        html_content = "".join(captured_requests)
+        if not html_content:
+            html_content = "<h3 style='text-align:center'>لم يتم اعتراض طلبات API واضحة. قد يكون المحتوى مضمن داخل الـ HTML مباشرة.</h3>"
 
-                if item['type'] == 'iframe':
-                    media_html = f'<iframe src="{item["src"]}" allowfullscreen></iframe>'
-                    btn_text = "مشاهدة المصدر"
-                else:
-                    media_html = f'<video controls src="{item["src"]}"></video>'
-                    btn_text = "تحميل الفيديو"
-
-                html_cards += f"""
-                <div class="card">
-                    <div class="video-box">{media_html}</div>
-                    <div class="card-body">
-                        <div class="card-title">{item['title']}</div>
-                        <div class="path">المصدر: {item['origin']}</div>
-                        <a href="{btn_link}" class="btn" target="_blank">{btn_text}</a>
-                    </div>
-                </div>
-                """
-
-        stats_text = f"تم مسح {pages_scanned} صفحة | تم العثور على {len(extracted_data)} فيديو"
-        
-        final_html = HTML_TEMPLATE.format(stats=stats_text, content=html_cards)
+        final_html = HTML_TEMPLATE.format(content=html_content)
         
         with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
             f.write(final_html)
-        
-        print(f"🎉 تم الانتهاء! النتيجة: {stats_text}")
+            
+        print(f"✅ تم الانتهاء! تم رصد {len(captured_requests)} رابط خلفي.")
 
     except Exception as e:
-        print(f"❌ خطأ قاتل: {e}")
+        print(f"❌ Error: {e}")
     finally:
         driver.quit()
         display.stop()
 
 if __name__ == "__main__":
-    deep_excavator()
+    api_sniffer()
