@@ -4,44 +4,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academy - المحتوى الكامل</title>
+    <title>Academy - Cinema Mode</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --primary: #2563eb; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; }
-        body { font-family: Tahoma, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
-        .header { text-align: center; border-bottom: 3px solid var(--primary); padding-bottom: 20px; margin-bottom: 30px; }
-        .card { background: var(--card); padding: 20px; margin: 15px auto; border-radius: 12px; border: 1px solid #334155; max-width: 900px; display: flex; flex-direction: column; gap: 10px; }
-        .btn { background: var(--primary); color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; text-align: center; font-weight: bold; width: fit-content; }
-        .section-title { color: #fbbf24; font-size: 1.6rem; margin: 30px 0 10px 0; border-right: 5px solid #fbbf24; padding-right: 15px; font-weight: bold; }
-        .error-box { background: #7f1d1d; color: #fca5a5; padding: 20px; border-radius: 8px; text-align: center; margin: 20px; }
+        :root { --primary: #e11d48; --bg: #0f0f0f; --card: #1e1e1e; --text: #f1f1f1; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; }
+        
+        /* الهيدر */
+        header { background: linear-gradient(to bottom, #27272a, #0f0f0f); padding: 30px; text-align: center; border-bottom: 2px solid var(--primary); }
+        h1 { margin: 0; font-size: 2.5rem; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; }
+        
+        .container { max-width: 1100px; margin: 20px auto; padding: 0 15px; }
+
+        /* قسم الكورس */
+        .section-box { background: #18181b; border-radius: 16px; margin-bottom: 40px; overflow: hidden; border: 1px solid #3f3f46; }
+        .section-header { background: #27272a; padding: 15px 25px; font-size: 1.4rem; font-weight: bold; color: #fbbf24; border-bottom: 1px solid #3f3f46; }
+        .section-content { padding: 20px; }
+
+        /* مشغل الفيديو السينمائي */
+        .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 15px; }
+        .video-wrapper iframe, .video-wrapper video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+        
+        /* شبكة الصور */
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-bottom: 20px; }
+        .gallery-img { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; border: 2px solid #3f3f46; transition: 0.3s; }
+        .gallery-img:hover { transform: scale(1.05); border-color: var(--primary); }
+
+        /* الكروت والروابط */
+        .item-card { background: var(--card); padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333; }
+        .btn { background: var(--primary); color: white; padding: 8px 20px; text-decoration: none; border-radius: 50px; font-weight: bold; transition: 0.2s; font-size: 0.9rem; }
+        .btn:hover { background: #be123c; transform: translateY(-2px); }
+        
+        .badge { background: #3f3f46; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; color: #a1a1aa; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>🚀 ACADEMY PRO</h1>
-        <p>تم سحب المحتوى باستخدام الشاشة الوهمية</p>
-        <div style="font-size:0.8rem; color:#94a3b8">2026-01-27 11:16:31.055909</div>
+    <header>
+        <h1><i class="fas fa-play-circle"></i> ACADEMY CINEMA</h1>
+        <p>مشغل فيديوهات ومعرض صور للمحتوى التعليمي</p>
+        <div style="color:#71717a; font-size:0.8rem; margin-top:10px;">اخر تحديث: 2026-01-27 11:23:20.695011</div>
+    </header>
+
+    <div class="container">
+        <h3 style='text-align:center; padding:50px;'>لم يتم العثور على ميديا. تأكد أن الموقع يعمل.</h3>
     </div>
-    <div id="content">
-                    <div class="card">
-                        <h3>📄 كورساتك</h3>
-                        <a href="https://coursatk.online/" class="btn" target="_blank">فتح / تحميل</a>
-                    </div>
-                    
-                    <div class="card">
-                        <h3>📄 دخول</h3>
-                        <a href="https://coursatk.online/login" class="btn" target="_blank">فتح / تحميل</a>
-                    </div>
-                    
-                    <div class="card">
-                        <h3>📄 اشترك</h3>
-                        <a href="https://coursatk.online/subscribe" class="btn" target="_blank">فتح / تحميل</a>
-                    </div>
-                    <div class="section-title">سجل دخولك وكمّل المنهج بطعم الضحك</div>
-                    <div class="card">
-                        <h3>📄 ارجع للصفحة الرئيسية واعرف الخطوات</h3>
-                        <a href="https://coursatk.online/#top" class="btn" target="_blank">فتح / تحميل</a>
-                    </div>
-                    <div class="section-title">حالة الدخول</div></div>
 </body>
 </html>
