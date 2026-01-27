@@ -3,42 +3,188 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academy - الخزنة</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Academy - API Hunter</title>
     <style>
-        :root { --primary: #fbbf24; --bg: #1a1a1a; --card: #2d2d2d; --text: #eaeaea; }
-        body { font-family: Tahoma, sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
-        header { text-align: center; border-bottom: 2px solid var(--primary); padding-bottom: 20px; margin-bottom: 30px; }
-        
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-        .card { background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid #444; display: flex; flex-direction: column; }
-        
-        .video-box { position: relative; padding-bottom: 56.25%; height: 0; background: #000; border-bottom: 1px solid #444; }
-        .video-box iframe, .video-box video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-        
-        .card-body { padding: 15px; flex-grow: 1; }
-        .card-title { font-size: 1.1rem; color: var(--primary); font-weight: bold; margin-bottom: 10px; }
-        .path { font-size: 0.8rem; color: #888; margin-bottom: 10px; }
-        
-        .btn { display: block; background: #2563eb; color: white; text-align: center; padding: 10px; border-radius: 6px; text-decoration: none; font-weight: bold; margin-top: auto; }
-        .btn:hover { background: #1d4ed8; }
-        
-        .stats { background: #333; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; color: #aaa; font-family: monospace; }
+        body { font-family: monospace; background: #0d1117; color: #c9d1d9; padding: 20px; }
+        h1 { color: #58a6ff; text-align: center; border-bottom: 1px solid #30363d; padding-bottom: 10px; }
+        .section { background: #161b22; border: 1px solid #30363d; border-radius: 6px; margin-bottom: 20px; padding: 15px; }
+        .label { display: inline-block; padding: 2px 5px; border-radius: 4px; font-size: 0.8em; margin-left: 10px; font-weight: bold; }
+        .json-tag { background: #d29922; color: #000; }
+        .video-tag { background: #238636; color: #fff; }
+        .url { word-break: break-all; color: #a5d6ff; display: block; margin-bottom: 5px; }
+        .btn { display: inline-block; background: #21262d; color: #c9d1d9; text-decoration: none; padding: 5px 10px; border: 1px solid #30363d; border-radius: 6px; margin-top: 5px; }
+        .btn:hover { background: #30363d; color: #58a6ff; }
+        .raw-data { display: none; background: #000; padding: 10px; margin-top: 10px; border-left: 3px solid #58a6ff; white-space: pre-wrap; }
     </style>
+    <script>
+        function toggleDetails(id) {
+            var x = document.getElementById(id);
+            if (x.style.display === "none") { x.style.display = "block"; } else { x.style.display = "none"; }
+        }
+    </script>
 </head>
 <body>
-    <header>
-        <h1>💎 ACADEMY VAULT</h1>
-        <p>تم استخراج الفيديوهات من العمق</p>
-    </header>
-
-    <div class="stats">
-        تم مسح 3 صفحة | تم العثور على 0 فيديو
-    </div>
-
-    <div class="grid">
-        <h2 style='text-align:center; padding:50px; color:#ef4444'>للأسف لم يتم العثور على فيديوهات حتى بعد البحث العميق.</h2>
+    <h1>📡 API & NETWORK SNIFFER</h1>
+    <p style="text-align:center">تم اعتراض الاتصالات الخلفية للموقع</p>
+    
+    <div id="results">
+        
+                        <div class="section">
+                            <span class="label json-tag">API / DATA</span>
+                            <span style="color:#8b949e; font-size:0.8em">image/svg+xml</span>
+                            <a href="chrome://resources/cr_components/searchbox/icons/search_spark.svg" target="_blank" class="url">chrome://resources/cr_components/searchbox/icons/search_spark.svg</a>
+                            <button class="btn" onclick="toggleDetails('details_0')">عرض التفاصيل</button>
+                            <a href="chrome://resources/cr_components/searchbox/icons/search_spark.svg" class="btn" target="_blank">فتح الرابط</a>
+                            <div id="details_0" class="raw-data">
+                                Status: 200 OK
+                                <br>Server IP: N/A
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <span class="label json-tag">API / DATA</span>
+                            <span style="color:#8b949e; font-size:0.8em">image/svg+xml</span>
+                            <a href="chrome://resources/cr_components/searchbox/icons/mic.svg" target="_blank" class="url">chrome://resources/cr_components/searchbox/icons/mic.svg</a>
+                            <button class="btn" onclick="toggleDetails('details_1')">عرض التفاصيل</button>
+                            <a href="chrome://resources/cr_components/searchbox/icons/mic.svg" class="btn" target="_blank">فتح الرابط</a>
+                            <div id="details_1" class="raw-data">
+                                Status: 200 OK
+                                <br>Server IP: N/A
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <span class="label json-tag">API / DATA</span>
+                            <span style="color:#8b949e; font-size:0.8em">image/svg+xml</span>
+                            <a href="chrome://resources/cr_components/searchbox/icons/camera.svg" target="_blank" class="url">chrome://resources/cr_components/searchbox/icons/camera.svg</a>
+                            <button class="btn" onclick="toggleDetails('details_2')">عرض التفاصيل</button>
+                            <a href="chrome://resources/cr_components/searchbox/icons/camera.svg" class="btn" target="_blank">فتح الرابط</a>
+                            <div id="details_2" class="raw-data">
+                                Status: 200 OK
+                                <br>Server IP: N/A
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <span class="label json-tag">API / DATA</span>
+                            <span style="color:#8b949e; font-size:0.8em">image/svg+xml</span>
+                            <a href="chrome://resources/images/icon_more_vert.svg" target="_blank" class="url">chrome://resources/images/icon_more_vert.svg</a>
+                            <button class="btn" onclick="toggleDetails('details_3')">عرض التفاصيل</button>
+                            <a href="chrome://resources/images/icon_more_vert.svg" class="btn" target="_blank">فتح الرابط</a>
+                            <div id="details_3" class="raw-data">
+                                Status: 200 OK
+                                <br>Server IP: N/A
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <span class="label json-tag">API / DATA</span>
+                            <span style="color:#8b949e; font-size:0.8em">image/svg+xml</span>
+                            <a href="chrome://resources/images/add.svg" target="_blank" class="url">chrome://resources/images/add.svg</a>
+                            <button class="btn" onclick="toggleDetails('details_4')">عرض التفاصيل</button>
+                            <a href="chrome://resources/images/add.svg" class="btn" target="_blank">فتح الرابط</a>
+                            <div id="details_4" class="raw-data">
+                                Status: 200 OK
+                                <br>Server IP: N/A
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <span class="label json-tag">API / DATA</span>
+                            <span style="color:#8b949e; font-size:0.8em">application/manifest+json</span>
+                            <a href="https://coursatk.online/manifest.json" target="_blank" class="url">https://coursatk.online/manifest.json</a>
+                            <button class="btn" onclick="toggleDetails('details_5')">عرض التفاصيل</button>
+                            <a href="https://coursatk.online/manifest.json" class="btn" target="_blank">فتح الرابط</a>
+                            <div id="details_5" class="raw-data">
+                                Status: 200 
+                                <br>Server IP: 104.21.77.60
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <span class="label json-tag">API / DATA</span>
+                            <span style="color:#8b949e; font-size:0.8em">image/svg+xml</span>
+                            <a href="https://coursatk.online/icon0.svg?icon0.800dbb07.svg" target="_blank" class="url">https://coursatk.online/icon0.svg?icon0.800dbb07.svg</a>
+                            <button class="btn" onclick="toggleDetails('details_6')">عرض التفاصيل</button>
+                            <a href="https://coursatk.online/icon0.svg?icon0.800dbb07.svg" class="btn" target="_blank">فتح الرابط</a>
+                            <div id="details_6" class="raw-data">
+                                Status: 200 
+                                <br>Server IP: 104.21.77.60
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <span class="label json-tag">API / DATA</span>
+                            <span style="color:#8b949e; font-size:0.8em">image/svg+xml</span>
+                            <a href="https://coursatk.online/icon0.svg?icon0.800dbb07.svg" target="_blank" class="url">https://coursatk.online/icon0.svg?icon0.800dbb07.svg</a>
+                            <button class="btn" onclick="toggleDetails('details_7')">عرض التفاصيل</button>
+                            <a href="https://coursatk.online/icon0.svg?icon0.800dbb07.svg" class="btn" target="_blank">فتح الرابط</a>
+                            <div id="details_7" class="raw-data">
+                                Status: 200 
+                                <br>Server IP: 104.21.77.60
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <span class="label json-tag">API / DATA</span>
+                            <span style="color:#8b949e; font-size:0.8em">image/svg+xml</span>
+                            <a href="https://coursatk.online/icon0.svg?icon0.800dbb07.svg" target="_blank" class="url">https://coursatk.online/icon0.svg?icon0.800dbb07.svg</a>
+                            <button class="btn" onclick="toggleDetails('details_8')">عرض التفاصيل</button>
+                            <a href="https://coursatk.online/icon0.svg?icon0.800dbb07.svg" class="btn" target="_blank">فتح الرابط</a>
+                            <div id="details_8" class="raw-data">
+                                Status: 200 
+                                <br>Server IP: 104.21.77.60
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <span class="label json-tag">API / DATA</span>
+                            <span style="color:#8b949e; font-size:0.8em">application/manifest+json</span>
+                            <a href="https://coursatk.online/manifest.json" target="_blank" class="url">https://coursatk.online/manifest.json</a>
+                            <button class="btn" onclick="toggleDetails('details_9')">عرض التفاصيل</button>
+                            <a href="https://coursatk.online/manifest.json" class="btn" target="_blank">فتح الرابط</a>
+                            <div id="details_9" class="raw-data">
+                                Status: 200 
+                                <br>Server IP: 104.21.77.60
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <span class="label json-tag">API / DATA</span>
+                            <span style="color:#8b949e; font-size:0.8em">application/json</span>
+                            <a href="https://salesiq.zohopublic.com/visitor/v2/channels/website?widgetcode=siqd6fbfd244408ceebf473aed91facb3f757799ec1fcd67bd24c870643f2719aed&pagetitle=%D9%83%D9%88%D8%B1%D8%B3%D8%A7%D8%AA%D9%83&current_domain=https%3A%2F%2Fcoursatk.online&internal_channel_req=true&browser_language=ar&is_signaturechat=false&include_fields=avuid" target="_blank" class="url">https://salesiq.zohopublic.com/visitor/v2/channels/website?widgetcode=siqd6fbfd244408ceebf473aed91facb3f757799ec1fcd67bd24c870643f2719aed&pagetitle=%D9%83%D9%88%D8%B1%D8%B3%D8%A7%D8%AA%D9%83&current_domain=https%3A%2F%2Fcoursatk.online&internal_channel_req=true&browser_language=ar&is_signaturechat=false&include_fields=avuid</a>
+                            <button class="btn" onclick="toggleDetails('details_10')">عرض التفاصيل</button>
+                            <a href="https://salesiq.zohopublic.com/visitor/v2/channels/website?widgetcode=siqd6fbfd244408ceebf473aed91facb3f757799ec1fcd67bd24c870643f2719aed&pagetitle=%D9%83%D9%88%D8%B1%D8%B3%D8%A7%D8%AA%D9%83&current_domain=https%3A%2F%2Fcoursatk.online&internal_channel_req=true&browser_language=ar&is_signaturechat=false&include_fields=avuid" class="btn" target="_blank">فتح الرابط</a>
+                            <div id="details_10" class="raw-data">
+                                Status: 200 
+                                <br>Server IP: 204.141.42.97
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <span class="label json-tag">API / DATA</span>
+                            <span style="color:#8b949e; font-size:0.8em">application/json</span>
+                            <a href="https://salesiq.zohopublic.com/visitor/v2/coursatk/livevisitors/e98d2e61-90e4-4651-9809-a97b15be756e/triggers" target="_blank" class="url">https://salesiq.zohopublic.com/visitor/v2/coursatk/livevisitors/e98d2e61-90e4-4651-9809-a97b15be756e/triggers</a>
+                            <button class="btn" onclick="toggleDetails('details_11')">عرض التفاصيل</button>
+                            <a href="https://salesiq.zohopublic.com/visitor/v2/coursatk/livevisitors/e98d2e61-90e4-4651-9809-a97b15be756e/triggers" class="btn" target="_blank">فتح الرابط</a>
+                            <div id="details_11" class="raw-data">
+                                Status: 200 
+                                <br>Server IP: 204.141.42.97
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <span class="label json-tag">API / DATA</span>
+                            <span style="color:#8b949e; font-size:0.8em">image/svg+xml</span>
+                            <a href="https://coursatk.online/icon0.svg?icon0.800dbb07.svg" target="_blank" class="url">https://coursatk.online/icon0.svg?icon0.800dbb07.svg</a>
+                            <button class="btn" onclick="toggleDetails('details_12')">عرض التفاصيل</button>
+                            <a href="https://coursatk.online/icon0.svg?icon0.800dbb07.svg" class="btn" target="_blank">فتح الرابط</a>
+                            <div id="details_12" class="raw-data">
+                                Status: 200 
+                                <br>Server IP: 104.21.77.60
+                            </div>
+                        </div>
+                        
     </div>
 </body>
 </html>
