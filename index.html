@@ -4,21 +4,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academy - المحتوى المستخرج</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Academy - المنصة الكاملة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: Tahoma, sans-serif; background: #0f172a; color: #fff; margin: 0; padding: 20px; }
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #0ea5e9; padding-bottom: 20px; }
-        .card { background: #1e293b; padding: 15px; margin: 10px auto; border-radius: 10px; border: 1px solid #334155; max-width: 800px; display: flex; justify-content: space-between; align-items: center; }
-        .btn { background: #22c55e; color: white; padding: 8px 15px; text-decoration: none; border-radius: 5px; font-weight: bold; }
-        .time { color: #94a3b8; font-size: 0.8rem; text-align: center; }
+        :root { --primary: #3b82f6; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; }
+        
+        /* الهيدر */
+        header { background: #111827; padding: 2rem; text-align: center; border-bottom: 4px solid var(--primary); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+        header h1 { margin: 0; font-size: 2.5rem; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; }
+        header p { color: #9ca3af; margin-top: 10px; }
+
+        /* الحاوية */
+        .container { max-width: 900px; margin: 2rem auto; padding: 0 1rem; display: flex; flex-direction: column; gap: 20px; }
+
+        /* كارت المحتوى العام */
+        .card { background: var(--card); border-radius: 16px; overflow: hidden; border: 1px solid #374151; transition: transform 0.2s; }
+        .card:hover { transform: translateY(-3px); border-color: var(--primary); }
+        
+        /* كارت الفيديو */
+        .video-card { padding: 0; }
+        .video-wrapper { position: relative; width: 100%; background: #000; }
+        video { width: 100%; display: block; max-height: 500px; }
+        .card-body { padding: 1.5rem; }
+        .card-title { margin: 0 0 10px 0; font-size: 1.25rem; font-weight: bold; color: white; }
+        
+        /* الأزرار */
+        .btn { display: inline-flex; align-items: center; gap: 8px; background: var(--primary); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: 0.2s; }
+        .btn:hover { background: #2563eb; }
+        .btn-download { background: #10b981; }
+        .btn-download:hover { background: #059669; }
+
+        /* الصور */
+        .img-card img { width: 100%; height: auto; display: block; }
+        
+        /* العناوين الفاصلة (الكورسات) */
+        .section-title { color: #fbbf24; font-size: 1.8rem; margin: 2rem 0 1rem 0; border-right: 5px solid #fbbf24; padding-right: 15px; background: rgba(251, 191, 36, 0.1); padding: 10px; border-radius: 8px; }
+
+        .footer { text-align: center; padding: 2rem; color: #6b7280; font-size: 0.9rem; margin-top: 3rem; border-top: 1px solid #374151; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>ACADEMY LIBRARY</h1>
-        <p>تم التحديث: 2026-01-27 10:49:43.565243</p>
+
+    <header>
+        <h1><i class="fas fa-university"></i> ACADEMY</h1>
+        <p>تم سحب المحتوى الكامل: فيديوهات - صور - ملفات</p>
+        <div style="font-size: 0.8rem; color: #6b7280; margin-top: 5px;">تاريخ التحديث: 2026-01-27 10:56:22.006634</div>
+    </header>
+
+    <div class="container">
+        <h3 style='color:red; text-align:center;'>خطأ في النظام: 402 Client Error: Payment Required for url: https://uploadi.vercel.app/cur.html</h3>
     </div>
-    <div id="content"><h3 style='text-align:center'>⚠️ لم يتم العثور على فيديوهات مباشرة حالياً</h3></div>
+
+    <div class="footer">
+        Generated automatically by Academy Scraper &copy; 2024
+    </div>
+
 </body>
 </html>
