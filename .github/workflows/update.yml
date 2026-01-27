@@ -1,4 +1,4 @@
-name: Update Academy Site (Selenium)
+name: Update Academy Site
 
 on:
   workflow_dispatch:
@@ -18,13 +18,13 @@ jobs:
         with:
           python-version: '3.9'
 
-      # هذه الخطوة مهمة لتشغيل المتصفح
+      # الخطوة دي مهمة: بننزل كروم عشان المكتبة تلاقيه
       - name: Install Chrome
         uses: browser-actions/setup-chrome@v1
 
       - name: Install dependencies
         run: |
-          pip install selenium webdriver-manager beautifulsoup4 requests
+          pip install -r requirements.txt
 
       - name: Run Scraper
         run: python scraper.py
@@ -34,5 +34,5 @@ jobs:
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
           git add index.html
-          git commit -m "Auto-update content with Selenium" || echo "No changes to commit"
+          git commit -m "Stealth Update" || echo "No changes to commit"
           git push
