@@ -1,196 +1,190 @@
-import requests
+import os
+import time
+import datetime
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
-import datetime
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.by import By
 
 # --- إعدادات الرابط ---
-TARGET_URL = "https://uploadi.vercel.app/cur.html"
+TARGET_URL = "https://coursatk.online/years"
 OUTPUT_FILE = "index.html"
 
-# --- تصميم المنصة (النسخة المتطورة) ---
+# --- تصميم المنصة (نفس التصميم الاحترافي) ---
 HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academy - المنصة الكاملة</title>
+    <title>Academy - المحتوى الشامل</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {{ --primary: #3b82f6; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; }}
         body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; }}
         
-        /* الهيدر */
-        header {{ background: #111827; padding: 2rem; text-align: center; border-bottom: 4px solid var(--primary); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }}
-        header h1 {{ margin: 0; font-size: 2.5rem; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; }}
+        header {{ background: #111827; padding: 2rem; text-align: center; border-bottom: 4px solid var(--primary); }}
+        header h1 {{ margin: 0; font-size: 2.5rem; color: var(--primary); text-transform: uppercase; }}
         header p {{ color: #9ca3af; margin-top: 10px; }}
 
-        /* الحاوية */
-        .container {{ max-width: 900px; margin: 2rem auto; padding: 0 1rem; display: flex; flex-direction: column; gap: 20px; }}
+        .container {{ max-width: 1000px; margin: 2rem auto; padding: 0 1rem; display: flex; flex-direction: column; gap: 20px; }}
 
-        /* كارت المحتوى العام */
-        .card {{ background: var(--card); border-radius: 16px; overflow: hidden; border: 1px solid #374151; transition: transform 0.2s; }}
+        .section-title {{ color: #fbbf24; font-size: 1.5rem; margin-top: 2rem; border-right: 4px solid #fbbf24; padding-right: 10px; }}
+
+        .card {{ background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid #374151; transition: 0.3s; display: flex; flex-direction: column; }}
         .card:hover {{ transform: translateY(-3px); border-color: var(--primary); }}
         
-        /* كارت الفيديو */
-        .video-card {{ padding: 0; }}
-        .video-wrapper {{ position: relative; width: 100%; background: #000; }}
-        video {{ width: 100%; display: block; max-height: 500px; }}
         .card-body {{ padding: 1.5rem; }}
-        .card-title {{ margin: 0 0 10px 0; font-size: 1.25rem; font-weight: bold; color: white; }}
+        .card-title {{ margin: 0 0 10px 0; font-size: 1.1rem; font-weight: bold; color: white; }}
         
-        /* الأزرار */
-        .btn {{ display: inline-flex; align-items: center; gap: 8px; background: var(--primary); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: 0.2s; }}
-        .btn:hover {{ background: #2563eb; }}
-        .btn-download {{ background: #10b981; }}
-        .btn-download:hover {{ background: #059669; }}
-
+        /* مشغل الفيديو */
+        video {{ width: 100%; display: block; background: #000; max-height: 400px; }}
+        
         /* الصور */
-        .img-card img {{ width: 100%; height: auto; display: block; }}
-        
-        /* العناوين الفاصلة (الكورسات) */
-        .section-title {{ color: #fbbf24; font-size: 1.8rem; margin: 2rem 0 1rem 0; border-right: 5px solid #fbbf24; padding-right: 15px; background: rgba(251, 191, 36, 0.1); padding: 10px; border-radius: 8px; }}
+        .img-preview {{ width: 100%; height: auto; object-fit: cover; max-height: 300px; }}
 
-        .footer {{ text-align: center; padding: 2rem; color: #6b7280; font-size: 0.9rem; margin-top: 3rem; border-top: 1px solid #374151; }}
+        .btn {{ display: inline-flex; align-items: center; gap: 8px; background: var(--primary); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 10px; }}
+        .btn:hover {{ background: #2563eb; }}
+        
+        .meta-tag {{ background: #374151; color: #d1d5db; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; margin-left: 5px; }}
     </style>
 </head>
 <body>
-
     <header>
         <h1><i class="fas fa-university"></i> ACADEMY</h1>
-        <p>تم سحب المحتوى الكامل: فيديوهات - صور - ملفات</p>
-        <div style="font-size: 0.8rem; color: #6b7280; margin-top: 5px;">تاريخ التحديث: {date}</div>
+        <p>تم سحب المحتوى بعد فك التشفير</p>
+        <div style="font-size: 0.8rem; color: #6b7280;">تاريخ السحب: {date}</div>
     </header>
 
     <div class="container">
         {content}
     </div>
 
-    <div class="footer">
-        Generated automatically by Academy Scraper &copy; 2024
-    </div>
-
+    <footer style="text-align: center; padding: 2rem; color: #4b5563; margin-top: 2rem;">
+        تم الإنشاء بواسطة Academy Tool &copy; 2024
+    </footer>
 </body>
 </html>
 """
 
-def build_site():
-    print("🚀 بدء عملية السحب الشامل...")
+def get_content():
+    print("🚀 جاري تشغيل المتصفح الذكي (Selenium)...")
+    
+    # إعدادات المتصفح (يعمل في الخلفية على السيرفر، أو يظهر لك لو على جهازك)
+    options = webdriver.ChromeOptions()
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--headless')  # اجعلها False إذا كنت تشغل الكود على جهازك وتريد رؤية المتصفح
+    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+
     try:
-        # 1. الاتصال بالموقع
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
-        response = requests.get(TARGET_URL, headers=headers, timeout=20)
-        response.raise_for_status()
-        
-        soup = BeautifulSoup(response.text, 'html.parser')
+        print(f"🌍 جاري الدخول إلى: {TARGET_URL}")
+        driver.get(TARGET_URL)
+
+        # --- مرحلة الانتظار الذكي (لفك البوابة) ---
+        print("⏳ ننتظر قليلاً لضمان تحميل الصفحة بالكامل وتخطي أي حماية بسيطة...")
+        time.sleep(10) # انتظار 10 ثواني (يمكن زيادتها لو الموقع بطيء)
+
+        # سحب كود الصفحة بعد التحميل الكامل
+        page_source = driver.page_source
+        soup = BeautifulSoup(page_source, 'html.parser')
         
         html_content = ""
-        items_count = 0
+        count = 0
 
-        # 2. البحث الذكي (Smart Scanning)
-        # سنقوم بالبحث عن العناصر بالترتيب لضمان بقاء هيكل الموقع كما هو
-        # نبحث عن: عناوين (h1-h3)، فيديوهات، صور، وروابط
+        # --- تحليل المحتوى بذكاء ---
         
-        # نحدد المنطقة الرئيسية للمحتوى (body أو main) لتجنب القوائم الجانبية
-        main_content = soup.find('main') or soup.find('body')
+        # 1. العناوين (لفصل الأقسام)
+        main_area = soup.find('body')
         
-        if not main_content:
-            main_content = soup
+        elements = main_area.find_all(['h1', 'h2', 'a', 'video', 'img', 'div'])
+        
+        seen_links = set()
 
-        for element in main_content.find_all(['h1', 'h2', 'h3', 'video', 'img', 'a', 'iframe']):
+        for el in elements:
+            # العناوين
+            if el.name in ['h1', 'h2'] and el.text.strip():
+                html_content += f'<div class="section-title">{el.text.strip()}</div>'
             
-            # --- الحالة 1: العناوين (اسم الكورس أو القسم) ---
-            if element.name in ['h1', 'h2', 'h3']:
-                text = element.text.strip()
-                if text:
-                    html_content += f'<h2 class="section-title">{text}</h2>'
-
-            # --- الحالة 2: الفيديوهات المباشرة (<video>) ---
-            elif element.name == 'video':
-                src = element.get('src')
-                # لو مفيش src مباشر، ندور جوه <source>
-                if not src:
-                    source_tag = element.find('source')
-                    if source_tag:
-                        src = source_tag.get('src')
-                
-                if src:
-                    full_src = urljoin(TARGET_URL, src)
-                    items_count += 1
-                    html_content += f"""
-                    <div class="card video-card">
-                        <div class="video-wrapper">
-                            <video controls preload="metadata">
-                                <source src="{full_src}" type="video/mp4">
-                                متصفحك لا يدعم الفيديو.
-                            </video>
-                        </div>
-                        <div class="card-body">
-                            <h3 class="card-title">🎥 فيديو تعليمي #{items_count}</h3>
-                            <a href="{full_src}" class="btn btn-download" download target="_blank">
-                                <i class="fas fa-download"></i> تحميل الفيديو
-                            </a>
-                        </div>
-                    </div>
-                    """
-
-            # --- الحالة 3: الصور (محتوى الكورس المصور) ---
-            elif element.name == 'img':
-                src = element.get('src')
-                if src:
-                    full_src = urljoin(TARGET_URL, src)
-                    # نتجاهل الأيقونات الصغيرة جداً
-                    if "icon" not in full_src.lower() and "logo" not in full_src.lower(): 
-                        html_content += f"""
-                        <div class="card img-card">
-                            <img src="{full_src}" alt="صورة توضيحية">
-                        </div>
-                        """
-
-            # --- الحالة 4: الروابط (قد تكون فيديوهات مخفية) ---
-            elif element.name == 'a':
-                href = element.get('href')
-                text = element.text.strip()
-                if href and href != "#":
-                    full_href = urljoin(TARGET_URL, href)
+            # الروابط (نبحث عن الكورسات والملفات)
+            if el.name == 'a':
+                href = el.get('href')
+                text = el.text.strip()
+                if href and href not in seen_links and not href.startswith('#') and not href.startswith('javascript'):
+                    full_url = urljoin(TARGET_URL, href)
+                    seen_links.add(href)
                     
-                    # هل الرابط يؤدي لفيديو؟
-                    is_video_link = any(full_href.lower().endswith(ext) for ext in ['.mp4', '.mkv', '.avi'])
+                    # تصنيف الرابط
+                    icon = "fa-link"
+                    btn_text = "فتح الرابط"
                     
-                    if is_video_link:
-                        items_count += 1
-                        name = text if text else f"فيديو رقم {items_count}"
+                    # هل هو ملف؟
+                    if any(ext in full_url.lower() for ext in ['.pdf', '.zip', '.rar', '.doc']):
+                        icon = "fa-file-arrow-down"
+                        btn_text = "تحميل الملف"
+                    # هل هو فيديو؟
+                    elif any(ext in full_url.lower() for ext in ['.mp4', '.mkv']):
+                        icon = "fa-video"
+                        btn_text = "تحميل الفيديو"
+                    
+                    # تجاهل الروابط القصيرة جداً أو روابط القوائم
+                    if len(text) > 3 or "http" in text or "video" in str(el):
+                        count += 1
                         html_content += f"""
                         <div class="card">
-                            <div class="card-body" style="display:flex; justify-content:space-between; align-items:center;">
-                                <div>
-                                    <h3 class="card-title" style="margin:0; font-size:1rem;">🎬 {name}</h3>
-                                    <span style="color:#94a3b8; font-size:0.8rem;">ملف فيديو جاهز للتحميل</span>
-                                </div>
-                                <a href="{full_href}" class="btn btn-download" download target="_blank">
-                                    <i class="fas fa-download"></i> تحميل
-                                </a>
+                            <div class="card-body">
+                                <h3 class="card-title"><i class="fas {icon}"></i> {text if text else 'عنصر بدون عنوان'}</h3>
+                                <div style="font-size:0.8rem; color:#9ca3af; margin-bottom:10px;">{full_url[:60]}...</div>
+                                <a href="{full_url}" class="btn" target="_blank">{btn_text}</a>
                             </div>
                         </div>
                         """
 
-        if items_count == 0 and not html_content:
-            html_content = "<div style='text-align:center; padding:40px; color:#ef4444;'><h3>⚠️ لم يتم العثور على محتوى واضح.</h3><p>قد يكون الموقع يستخدم تقنيات حماية متقدمة.</p></div>"
+            # الفيديوهات المباشرة
+            if el.name == 'video':
+                src = el.get('src')
+                if src:
+                    full_url = urljoin(TARGET_URL, src)
+                    count += 1
+                    html_content += f"""
+                    <div class="card">
+                        <video controls src="{full_url}"></video>
+                        <div class="card-body">
+                            <h3 class="card-title">🎥 فيديو مباشر</h3>
+                            <a href="{full_url}" class="btn" download>تحميل الفيديو</a>
+                        </div>
+                    </div>
+                    """
 
-        # حفظ الملف النهائي
-        final_html = HTML_TEMPLATE.format(content=html_content, date=datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
-        
+            # الصور (لو كانت صور كورسات)
+            if el.name == 'img':
+                src = el.get('src')
+                if src and ('course' in src or 'thumb' in src or 'upload' in src):
+                    full_url = urljoin(TARGET_URL, src)
+                    html_content += f"""
+                    <div class="card" style="max-width: 400px;">
+                        <img src="{full_url}" class="img-preview" alt="صورة">
+                    </div>
+                    """
+
+        if count == 0:
+            html_content = "<div style='text-align:center; padding:50px;'><h3>⚠️ لم يتم العثور على محتوى، أو أن الحماية قوية جداً.</h3></div>"
+
+        # الحفظ
+        final_html = HTML_TEMPLATE.format(content=html_content, date=datetime.datetime.now())
         with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
             f.write(final_html)
             
-        print(f"✅ تم الانتهاء! تم استخراج {items_count} عنصر فيديو وملف.")
+        print(f"✅ تم الانتهاء! تم استخراج {count} عنصر.")
 
     except Exception as e:
-        print(f"❌ حدث خطأ: {e}")
-        # تسجيل الخطأ في ملف HTML عشان نشوفه
-        error_html = HTML_TEMPLATE.format(content=f"<h3 style='color:red; text-align:center;'>خطأ في النظام: {e}</h3>", date=datetime.datetime.now())
-        with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-            f.write(error_html)
+        print(f"❌ خطأ: {e}")
+    finally:
+        driver.quit()
 
 if __name__ == "__main__":
-    build_site()
+    get_content()
