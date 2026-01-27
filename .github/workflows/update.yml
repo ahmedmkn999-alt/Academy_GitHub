@@ -18,11 +18,16 @@ jobs:
         with:
           python-version: '3.9'
 
-      # الخطوة دي مهمة: بننزل كروم عشان المكتبة تلاقيه
+      # تسطيب الشاشة الوهمية ومتصفح كروم
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb
+          
       - name: Install Chrome
         uses: browser-actions/setup-chrome@v1
 
-      - name: Install dependencies
+      - name: Install Python Dependencies
         run: |
           pip install -r requirements.txt
 
@@ -34,5 +39,5 @@ jobs:
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
           git add index.html
-          git commit -m "Stealth Update" || echo "No changes to commit"
+          git commit -m "Fixed Cloudflare with Virtual Display" || echo "No changes to commit"
           git push
