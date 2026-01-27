@@ -4,61 +4,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academy - المنصة الكاملة</title>
+    <title>Academy - المحتوى الشامل</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root { --primary: #3b82f6; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; }
         
-        /* الهيدر */
-        header { background: #111827; padding: 2rem; text-align: center; border-bottom: 4px solid var(--primary); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
-        header h1 { margin: 0; font-size: 2.5rem; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; }
+        header { background: #111827; padding: 2rem; text-align: center; border-bottom: 4px solid var(--primary); }
+        header h1 { margin: 0; font-size: 2.5rem; color: var(--primary); text-transform: uppercase; }
         header p { color: #9ca3af; margin-top: 10px; }
 
-        /* الحاوية */
-        .container { max-width: 900px; margin: 2rem auto; padding: 0 1rem; display: flex; flex-direction: column; gap: 20px; }
+        .container { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; display: flex; flex-direction: column; gap: 20px; }
 
-        /* كارت المحتوى العام */
-        .card { background: var(--card); border-radius: 16px; overflow: hidden; border: 1px solid #374151; transition: transform 0.2s; }
+        .section-title { color: #fbbf24; font-size: 1.5rem; margin-top: 2rem; border-right: 4px solid #fbbf24; padding-right: 10px; }
+
+        .card { background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid #374151; transition: 0.3s; display: flex; flex-direction: column; }
         .card:hover { transform: translateY(-3px); border-color: var(--primary); }
         
-        /* كارت الفيديو */
-        .video-card { padding: 0; }
-        .video-wrapper { position: relative; width: 100%; background: #000; }
-        video { width: 100%; display: block; max-height: 500px; }
         .card-body { padding: 1.5rem; }
-        .card-title { margin: 0 0 10px 0; font-size: 1.25rem; font-weight: bold; color: white; }
+        .card-title { margin: 0 0 10px 0; font-size: 1.1rem; font-weight: bold; color: white; }
         
-        /* الأزرار */
-        .btn { display: inline-flex; align-items: center; gap: 8px; background: var(--primary); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: 0.2s; }
-        .btn:hover { background: #2563eb; }
-        .btn-download { background: #10b981; }
-        .btn-download:hover { background: #059669; }
-
+        /* مشغل الفيديو */
+        video { width: 100%; display: block; background: #000; max-height: 400px; }
+        
         /* الصور */
-        .img-card img { width: 100%; height: auto; display: block; }
-        
-        /* العناوين الفاصلة (الكورسات) */
-        .section-title { color: #fbbf24; font-size: 1.8rem; margin: 2rem 0 1rem 0; border-right: 5px solid #fbbf24; padding-right: 15px; background: rgba(251, 191, 36, 0.1); padding: 10px; border-radius: 8px; }
+        .img-preview { width: 100%; height: auto; object-fit: cover; max-height: 300px; }
 
-        .footer { text-align: center; padding: 2rem; color: #6b7280; font-size: 0.9rem; margin-top: 3rem; border-top: 1px solid #374151; }
+        .btn { display: inline-flex; align-items: center; gap: 8px; background: var(--primary); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 10px; }
+        .btn:hover { background: #2563eb; }
+        
+        .meta-tag { background: #374151; color: #d1d5db; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; margin-left: 5px; }
     </style>
 </head>
 <body>
-
     <header>
         <h1><i class="fas fa-university"></i> ACADEMY</h1>
-        <p>تم سحب المحتوى الكامل: فيديوهات - صور - ملفات</p>
-        <div style="font-size: 0.8rem; color: #6b7280; margin-top: 5px;">تاريخ التحديث: 2026-01-27 10:56:22.006634</div>
+        <p>تم سحب المحتوى بعد فك التشفير</p>
+        <div style="font-size: 0.8rem; color: #6b7280;">تاريخ السحب: 2026-01-27 11:05:48.751690</div>
     </header>
 
     <div class="container">
-        <h3 style='color:red; text-align:center;'>خطأ في النظام: 402 Client Error: Payment Required for url: https://uploadi.vercel.app/cur.html</h3>
+        <div class="section-title">coursatk.online</div>
+                        <div class="card">
+                            <div class="card-body">
+                                <h3 class="card-title"><i class="fas fa-link"></i> Cloudflare</h3>
+                                <div style="font-size:0.8rem; color:#9ca3af; margin-bottom:10px;">https://www.cloudflare.com?utm_source=challenge&utm_campaign...</div>
+                                <a href="https://www.cloudflare.com?utm_source=challenge&utm_campaign=m" class="btn" target="_blank">فتح الرابط</a>
+                            </div>
+                        </div>
+                        
     </div>
 
-    <div class="footer">
-        Generated automatically by Academy Scraper &copy; 2024
-    </div>
-
+    <footer style="text-align: center; padding: 2rem; color: #4b5563; margin-top: 2rem;">
+        تم الإنشاء بواسطة Academy Tool &copy; 2024
+    </footer>
 </body>
 </html>
