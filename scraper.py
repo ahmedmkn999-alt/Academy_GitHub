@@ -1,135 +1,156 @@
-import undetected_chromedriver as uc
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-import time
-import json
+import requests
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin
 import datetime
-from pyvirtualdisplay import Display
+import os
 
-# الرابط المستهدف
-TARGET_URL = "https://coursatk.online/years"
+# الرابط الجديد المفتوح
+TARGET_URL = "https://uploadi.vercel.app/cur.html"
 OUTPUT_FILE = "index.html"
 
-# --- تصميم منصة كشف الـ API ---
+# تصميم المنصة الاحترافي
 HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Academy - API Hunter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academy - المحتوى المباشر</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {{ font-family: monospace; background: #0d1117; color: #c9d1d9; padding: 20px; }}
-        h1 {{ color: #58a6ff; text-align: center; border-bottom: 1px solid #30363d; padding-bottom: 10px; }}
-        .section {{ background: #161b22; border: 1px solid #30363d; border-radius: 6px; margin-bottom: 20px; padding: 15px; }}
-        .label {{ display: inline-block; padding: 2px 5px; border-radius: 4px; font-size: 0.8em; margin-left: 10px; font-weight: bold; }}
-        .json-tag {{ background: #d29922; color: #000; }}
-        .video-tag {{ background: #238636; color: #fff; }}
-        .url {{ word-break: break-all; color: #a5d6ff; display: block; margin-bottom: 5px; }}
-        .btn {{ display: inline-block; background: #21262d; color: #c9d1d9; text-decoration: none; padding: 5px 10px; border: 1px solid #30363d; border-radius: 6px; margin-top: 5px; }}
-        .btn:hover {{ background: #30363d; color: #58a6ff; }}
-        .raw-data {{ display: none; background: #000; padding: 10px; margin-top: 10px; border-left: 3px solid #58a6ff; white-space: pre-wrap; }}
+        :root {{ --primary: #0ea5e9; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; }}
+        body {{ font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); padding: 20px; }}
+        header {{ text-align: center; border-bottom: 3px solid var(--primary); padding-bottom: 20px; margin-bottom: 30px; }}
+        h1 {{ color: var(--primary); margin: 0; }}
+        
+        .grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }}
+        .card {{ background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid #334155; transition: transform 0.3s; }}
+        .card:hover {{ transform: translateY(-5px); border-color: var(--primary); }}
+        
+        .media-box {{ position: relative; background: #000; }}
+        .media-box video, .media-box iframe {{ width: 100%; display: block; }}
+        iframe {{ height: 250px; border: none; }}
+        
+        .card-body {{ padding: 15px; }}
+        .card-title {{ font-weight: bold; margin-bottom: 10px; color: #fbbf24; }}
+        .link-url {{ font-size: 0.8em; color: #94a3b8; word-break: break-all; margin-bottom: 15px; }}
+        
+        .btn {{ display: flex; align-items: center; justify-content: center; gap: 10px; background: var(--primary); color: white; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: bold; transition: 0.3s; }}
+        .btn:hover {{ background: #0284c7; }}
+        .btn-download {{ background: #22c55e; }}
+        .btn-download:hover {{ background: #16a34a; }}
     </style>
-    <script>
-        function toggleDetails(id) {{
-            var x = document.getElementById(id);
-            if (x.style.display === "none") {{ x.style.display = "block"; }} else {{ x.style.display = "none"; }}
-        }}
-    </script>
 </head>
 <body>
-    <h1>📡 API & NETWORK SNIFFER</h1>
-    <p style="text-align:center">تم اعتراض الاتصالات الخلفية للموقع</p>
-    
-    <div id="results">
-        {content}
-    </div>
+    <header>
+        <h1>💎 ACADEMY DIRECT</h1>
+        <p>تم سحب المحتوى من الرابط المباشر</p>
+        <div style="font-size:0.8em; color:#aaa">{date}</div>
+    </header>
+    <div class="grid">{content}</div>
+    <footer style="text-align:center; margin-top:30px; color:#aaa; font-size:0.8em">Academy Tool v3</footer>
 </body>
 </html>
 """
 
-def api_sniffer():
-    print("📡 تشغيل وضع التجسس على الشبكة...")
-    display = Display(visible=0, size=(1920, 1080))
-    display.start()
-
-    # تفعيل تسجيل الشبكة (Performance Logging)
-    caps = DesiredCapabilities.CHROME
-    caps['goog:loggingPrefs'] = {'performance': 'ALL'}
-
-    options = uc.ChromeOptions()
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
-    # دمج القدرات مع الخيارات
-    options.set_capability('goog:loggingPrefs', {'performance': 'ALL'})
-
-    driver = uc.Chrome(options=options)
+def fast_scrape():
+    print("🚀 بدء الماسح السريع...")
+    # استخدام هيدر لتمويه الطلب كمتصفح حقيقي
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    }
     
-    captured_requests = []
+    html_cards = ""
+    count = 0
+    seen_urls = set()
 
     try:
-        print(f"🌍 الدخول للموقع: {TARGET_URL}")
-        driver.get(TARGET_URL)
+        response = requests.get(TARGET_URL, headers=headers, timeout=15)
+        response.raise_for_status() # التأكد أن الصفحة تعمل
+        soup = BeautifulSoup(response.text, 'html.parser')
         
-        # ننتظر شوية عشان الموقع يحمل كل الـ APIs بتاعته
-        print("⏳ جاري تسجيل حركة المرور (30 ثانية)...")
-        time.sleep(30)
-        
-        # سحب سجلات الشبكة
-        logs = driver.get_log('performance')
-        print(f"📥 تم سحب {len(logs)} سجل شبكة. جاري التحليل...")
+        print("✅ تم الاتصال بالصفحة. جاري تحليل العناصر...")
 
-        for entry in logs:
-            try:
-                message = json.loads(entry['message'])['message']
-                
-                # إحنا مهتمين بالردود اللي جاية من السيرفر (ResponseReceived)
-                if message['method'] == 'Network.responseReceived':
-                    response = message['params']['response']
-                    url = response['url']
-                    mime_type = response['mimeType']
-                    
-                    # فلترة: إحنا عايزين ملفات الفيديو أو الـ JSON (الـ API)
-                    is_api = "json" in mime_type or "xml" in mime_type
-                    is_video = "video" in mime_type or "mpeg" in mime_type or "mp4" in url or "m3u8" in url
-                    
-                    # استبعاد ملفات الموقع العادية (CSS, Images, Fonts)
-                    if (is_api or is_video) and "google" not in url and "facebook" not in url:
-                        tag_class = "json-tag" if is_api else "video-tag"
-                        tag_name = "API / DATA" if is_api else "MEDIA FILE"
-                        
-                        captured_requests.append(f"""
-                        <div class="section">
-                            <span class="label {tag_class}">{tag_name}</span>
-                            <span style="color:#8b949e; font-size:0.8em">{mime_type}</span>
-                            <a href="{url}" target="_blank" class="url">{url}</a>
-                            <button class="btn" onclick="toggleDetails('details_{len(captured_requests)}')">عرض التفاصيل</button>
-                            <a href="{url}" class="btn" target="_blank">فتح الرابط</a>
-                            <div id="details_{len(captured_requests)}" class="raw-data">
-                                Status: {response['status']} {response['statusText']}
-                                <br>Server IP: {response.get('remoteIPAddress', 'N/A')}
-                            </div>
+        # 1. البحث عن فيديوهات مباشرة (Video Tag)
+        for vid in soup.find_all('video'):
+            src = vid.get('src')
+            if src:
+                full = urljoin(TARGET_URL, src)
+                if full not in seen_urls:
+                    count += 1
+                    seen_urls.add(full)
+                    html_cards += f"""
+                    <div class="card">
+                        <div class="media-box"><video controls src="{full}"></video></div>
+                        <div class="card-body">
+                            <div class="card-title">🎥 فيديو مباشر {count}</div>
+                            <a href="{full}" class="btn btn-download" download target="_blank"><i class="fas fa-download"></i> تحميل الفيديو</a>
                         </div>
-                        """)
+                    </div>
+                    """
 
-            except Exception:
-                continue
+        # 2. البحث عن إطارات مضمنة (Iframes - مثل يوتيوب)
+        for frame in soup.find_all('iframe'):
+            src = frame.get('src')
+            if src:
+                full = urljoin(TARGET_URL, src)
+                if full not in seen_urls:
+                    count += 1
+                    seen_urls.add(full)
+                    html_cards += f"""
+                    <div class="card">
+                        <div class="media-box"><iframe src="{full}" allowfullscreen></iframe></div>
+                        <div class="card-body">
+                            <div class="card-title">📺 فيديو مضمن {count}</div>
+                            <a href="{full}" class="btn" target="_blank"><i class="fas fa-external-link-alt"></i> فتح المصدر</a>
+                        </div>
+                    </div>
+                    """
 
-        # حفظ التقرير
-        html_content = "".join(captured_requests)
-        if not html_content:
-            html_content = "<h3 style='text-align:center'>لم يتم اعتراض طلبات API واضحة. قد يكون المحتوى مضمن داخل الـ HTML مباشرة.</h3>"
+        # 3. البحث عن روابط عادية (Links)
+        for a in soup.find_all('a', href=True):
+            href = a['href']
+            text = a.text.strip()
+            if href and "#" not in href:
+                full = urljoin(TARGET_URL, href)
+                if full not in seen_urls and full != TARGET_URL:
+                    # استبعاد الروابط غير المفيدة
+                    if "vercel.app" in full and ".html" not in full and ".mp4" not in full: continue
 
-        final_html = HTML_TEMPLATE.format(content=html_content)
-        
+                    count += 1
+                    seen_urls.add(full)
+                    
+                    icon = "fa-link"
+                    btn_text = "فتح الرابط"
+                    btn_class = "btn"
+                    
+                    # تخصيص الأيقونة حسب نوع الرابط
+                    if any(x in full.lower() for x in ['.mp4', '.mkv', 'video']): icon = "fa-video"; btn_text="تحميل/مشاهدة"; btn_class="btn btn-download"
+                    elif any(x in full.lower() for x in ['.pdf', 'drive', 'download']): icon = "fa-file-arrow-down"; btn_text="تحميل الملف"
+
+                    html_cards += f"""
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="card-title"><i class="fas {icon}"></i> {text if text else f'رابط رقم {count}'}</div>
+                            <div class="link-url">{full}</div>
+                            <a href="{full}" class="{btn_class}" target="_blank">{btn_text}</a>
+                        </div>
+                    </div>
+                    """
+
+        if count == 0:
+            html_cards = "<h3 style='text-align:center; padding:50px'>⚠️ لم يتم العثور على محتوى ظاهر. قد تكون الصفحة فارغة أو تعتمد على جافاسكريبت.</h3>"
+
+        # حفظ الملف
+        final_html = HTML_TEMPLATE.format(content=html_cards, date=datetime.datetime.now())
         with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
             f.write(final_html)
-            
-        print(f"✅ تم الانتهاء! تم رصد {len(captured_requests)} رابط خلفي.")
+        print(f"🎉 تم الانتهاء! تم استخراج {count} عنصر.")
 
     except Exception as e:
         print(f"❌ Error: {e}")
-    finally:
-        driver.quit()
-        display.stop()
+        with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+            f.write(f"<h1>حدث خطأ في الاتصال: {e}</h1>")
 
 if __name__ == "__main__":
-    api_sniffer()
+    fast_scrape()
