@@ -1,4 +1,4 @@
-name: Fast Scraper (No Login)
+name: Selenium Scraper (JS Mode)
 
 on:
   workflow_dispatch:
@@ -18,6 +18,15 @@ jobs:
         with:
           python-version: '3.9'
 
+      # هذه الخطوة مهمة جداً لـ Selenium
+      - name: Install Chrome & Display
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb
+          
+      - name: Install Chrome Browser
+        uses: browser-actions/setup-chrome@v1
+
       - name: Install Dependencies
         run: |
           pip install -r requirements.txt
@@ -30,5 +39,5 @@ jobs:
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
           git add index.html
-          git commit -m "Content Updated" || echo "No changes"
+          git commit -m "Content Updated via Selenium" || echo "No changes"
           git push
