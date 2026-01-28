@@ -1,4 +1,4 @@
-name: Update Academy Site
+name: Fast Scraper (No Login)
 
 on:
   workflow_dispatch:
@@ -18,26 +18,17 @@ jobs:
         with:
           python-version: '3.9'
 
-      # تسطيب الشاشة الوهمية ومتصفح كروم
-      - name: Install System Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y xvfb
-          
-      - name: Install Chrome
-        uses: browser-actions/setup-chrome@v1
-
-      - name: Install Python Dependencies
+      - name: Install Dependencies
         run: |
           pip install -r requirements.txt
 
       - name: Run Scraper
         run: python scraper.py
 
-      - name: Commit and Push changes
+      - name: Commit Results
         run: |
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
           git add index.html
-          git commit -m "Fixed Cloudflare with Virtual Display" || echo "No changes to commit"
+          git commit -m "Content Updated" || echo "No changes"
           git push
