@@ -1,2 +1,5 @@
-requests
+undetected-chromedriver
+selenium
 beautifulsoup4
+pyvirtualdisplay
+requests
