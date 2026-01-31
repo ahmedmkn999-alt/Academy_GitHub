@@ -2,10 +2,9 @@ import undetected_chromedriver as uc
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import time
 import json
-import datetime
-from pyvirtualdisplay import Display
+import os
 
-# الرابط الجديد
+# الرابط الافتراضي
 TARGET_URL = "https://thanwyaplus.com/"
 OUTPUT_FILE = "index.html"
 
@@ -14,59 +13,53 @@ HTML_TEMPLATE = """
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Thanwya Plus - Network Analysis</title>
+    <title>Network Analysis Result</title>
     <style>
         body {{ font-family: monospace; background: #0d1117; color: #c9d1d9; padding: 20px; }}
-        .header {{ text-align: center; border-bottom: 2px solid #238636; padding-bottom: 20px; margin-bottom: 20px; }}
-        .section {{ background: #161b22; border: 1px solid #30363d; border-radius: 6px; margin-bottom: 15px; padding: 15px; }}
-        .tag {{ display: inline-block; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8em; margin-left: 10px; }}
-        .tag-video {{ background: #1f6feb; color: white; }}
-        .tag-api {{ background: #d29922; color: black; }}
-        .url {{ color: #58a6ff; word-break: break-all; display: block; margin: 10px 0; }}
-        .btn {{ background: #238636; color: white; padding: 5px 15px; text-decoration: none; border-radius: 5px; display: inline-block; }}
+        .header {{ border-bottom: 2px solid #238636; padding-bottom: 20px; margin-bottom: 20px; text-align: center; }}
+        .item {{ background: #161b22; border: 1px solid #30363d; margin-bottom: 10px; padding: 15px; border-radius: 6px; }}
+        .tag {{ padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-left: 10px; font-size: 0.8em; }}
+        .video {{ background: #1f6feb; color: white; }}
+        .api {{ background: #d29922; color: black; }}
+        .url {{ color: #58a6ff; display: block; margin-top: 5px; word-break: break-all; }}
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>🕵️‍♂️ THANWYA PLUS SNIFFER</h1>
-        <p>تحليل حركة الشبكة واستخراج الروابط الخلفية</p>
-    </div>
-    <div id="results">{content}</div>
+    <div class="header"><h1>🕵️‍♂️ تقرير تحليل الشبكة</h1><p>{url}</p></div>
+    <div id="content">{content}</div>
 </body>
 </html>
 """
 
-def analyze_thanwya():
-    print("📡 بدء تحليل Thanwya Plus...")
+def run_sniffer():
+    print("🚀 بدء التشغيل...")
     
-    # إعدادات تسجيل الشبكة
-    caps = DesiredCapabilities.CHROME
-    caps['goog:loggingPrefs'] = {'performance': 'ALL'}
-    
+    # إعدادات المتصفح لمنع الانهيار
     options = uc.ChromeOptions()
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--disable-gpu')
+    
+    # تفعيل مراقبة الشبكة
+    caps = DesiredCapabilities.CHROME
+    caps['goog:loggingPrefs'] = {'performance': 'ALL'}
     options.set_capability('goog:loggingPrefs', {'performance': 'ALL'})
 
-    # تشغيل الشاشة الوهمية (لو على سيرفر)
-    display = Display(visible=0, size=(1920, 1080))
-    display.start()
-
-    driver = uc.Chrome(options=options)
-    captured_data = []
-    unique_links = set()
-
+    driver = None
     try:
-        print(f"🌍 الدخول للموقع: {TARGET_URL}")
+        # تشغيل المتصفح
+        driver = uc.Chrome(options=options, version_main=None) # version_main=None ليختار الآلية تلقائياً
+        
+        print(f"🌍 الدخول إلى: {TARGET_URL}")
         driver.get(TARGET_URL)
         
-        # وقت كافي (60 ثانية) عشان لو حبيت تسجل دخول أو تتصفح
-        print("⏳ جاري الانتظار وتسجيل البيانات (60 ثانية)...")
-        time.sleep(60)
+        print("⏳ انتظار تحميل البيانات (45 ثانية)...")
+        time.sleep(45)
 
         # سحب السجلات
         logs = driver.get_log('performance')
-        print(f"📦 تم سحب {len(logs)} عملية شبكة. جاري الفرز...")
+        html_content = ""
+        unique_urls = set()
 
         for entry in logs:
             try:
@@ -76,42 +69,42 @@ def analyze_thanwya():
                     url = resp['url']
                     mime = resp['mimeType']
                     
-                    # البحث عن فيديو أو API
-                    is_video = any(x in mime for x in ['video', 'mpeg', 'mp4']) or any(x in url for x in ['.m3u8', '.mp4', 'vimeo', 'bunny.net'])
+                    is_video = any(x in mime for x in ['video', 'mpeg', 'mp4']) or '.m3u8' in url
                     is_api = 'json' in mime and 'api' in url
 
-                    if (is_video or is_api) and url not in unique_links:
-                        unique_links.add(url)
+                    if (is_video or is_api) and url not in unique_urls:
+                        unique_urls.add(url)
+                        tag_class = "video" if is_video else "api"
+                        tag_name = "VIDEO" if is_video else "API/DATA"
                         
-                        tag_type = "tag-video" if is_video else "tag-api"
-                        tag_text = "VIDEO FILE" if is_video else "API DATA"
-                        
-                        captured_data.append(f"""
-                        <div class="section">
-                            <span class="tag {tag_type}">{tag_text}</span>
+                        html_content += f"""
+                        <div class="item">
+                            <span class="tag {tag_class}">{tag_name}</span>
                             <span style="color:#8b949e">{mime}</span>
                             <a href="{url}" class="url" target="_blank">{url}</a>
-                            <a href="{url}" class="btn" target="_blank">فتح الرابط</a>
                         </div>
-                        """)
-
+                        """
             except:
                 continue
+        
+        if not html_content:
+            html_content = "<h3 style='text-align:center'>لم يتم رصد ملفات ميديا ظاهرة. قد يحتاج الموقع لتسجيل دخول.</h3>"
 
-        if not captured_data:
-            captured_data = ["<h3 style='text-align:center'>لم يتم رصد ميديا. (قد يحتاج الموقع لتسجيل دخول للوصول للمحتوى)</h3>"]
-
-        # حفظ التقرير
+        # الحفظ
         with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-            f.write(HTML_TEMPLATE.format(content="".join(captured_data)))
+            f.write(HTML_TEMPLATE.format(url=TARGET_URL, content=html_content))
             
-        print(f"✅ تم الانتهاء! تم رصد {len(unique_links)} رابط مهم.")
+        print("✅ تم الحفظ بنجاح.")
 
     except Exception as e:
         print(f"❌ Error: {e}")
+        # تسجيل الخطأ في الملف لنراه
+        with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+            f.write(f"<h1>حدث خطأ أثناء التشغيل:</h1><pre>{e}</pre>")
+            
     finally:
-        driver.quit()
-        display.stop()
+        if driver:
+            driver.quit()
 
 if __name__ == "__main__":
-    analyze_thanwya()
+    run_sniffer()
