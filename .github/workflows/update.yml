@@ -1,4 +1,4 @@
-name: Auto Scraper (Code 800000)
+name: Ultimate Explorer (800000)
 
 on:
   workflow_dispatch:
@@ -24,9 +24,9 @@ jobs:
           chrome-version: stable
 
       - name: Install Dependencies
-        run: pip install selenium webdriver-manager beautifulsoup4 requests
+        run: pip install selenium webdriver-manager beautifulsoup4
 
-      - name: Run Scraper
+      - name: Run Deep Scan
         run: python scraper.py
 
       - name: Commit Results
@@ -34,5 +34,5 @@ jobs:
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
           git add index.html
-          git commit -m "Done with code 800000" || echo "No changes"
+          git commit -m "Explored with Code 800000" || echo "No changes"
           git push
