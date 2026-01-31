@@ -7,161 +7,135 @@ from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 import time
+import os
 
 # --- الإعدادات ---
 TARGET_URL = "https://uploadi.vercel.app/cur.html"
 MY_CODE = "800000"
 OUTPUT_FILE = "index.html"
+SCREENSHOT_FILE = "screenshot.png"
 
 HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Academy Explorer</title>
+    <title>Academy Login Debug</title>
     <style>
-        body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; color: #fff; padding: 20px; }}
-        h1 {{ text-align: center; color: #fbbf24; border-bottom: 2px solid #334155; padding-bottom: 15px; }}
-        .stats {{ text-align: center; color: #94a3b8; margin-bottom: 30px; }}
-        
-        .grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }}
-        
-        /* كارت الفيديو */
-        .card-video {{ background: #1e293b; border: 1px solid #3b82f6; border-radius: 10px; overflow: hidden; }}
-        .card-video video {{ width: 100%; display: block; }}
-        .card-video .info {{ padding: 15px; }}
-        .btn-dl {{ display: block; background: #2563eb; color: white; text-align: center; padding: 10px; margin-top: 10px; border-radius: 5px; text-decoration: none; font-weight: bold; }}
-        
-        /* كارت المجلدات/الروابط */
-        .card-link {{ background: #334155; border-radius: 10px; padding: 20px; border: 1px solid #475569; transition: 0.3s; }}
-        .card-link:hover {{ transform: translateY(-5px); background: #475569; }}
-        .card-link a {{ color: #38bdf8; text-decoration: none; font-size: 1.1em; font-weight: bold; display: block; word-break: break-all; }}
-        .icon {{ font-size: 2em; float: right; opacity: 0.2; }}
+        body {{ font-family: sans-serif; background: #0f172a; color: #fff; padding: 20px; text-align: center; }}
+        .card {{ background: #1e293b; padding: 15px; margin: 10px auto; max-width: 600px; border-radius: 10px; border: 1px solid #334155; }}
+        a {{ color: #38bdf8; text-decoration: none; font-weight: bold; font-size: 1.2em; display: block; }}
+        h1 {{ color: #fbbf24; }}
+        .debug-img {{ max-width: 100%; border: 2px solid #ef4444; margin-top: 20px; border-radius: 10px; }}
     </style>
 </head>
 <body>
-    <h1>💎 المستكشف الشامل (الكود: {code})</h1>
-    <div class="stats">تم العثور على: {vid_count} فيديو | {link_count} قسم/رابط</div>
-    <div class="grid">{content}</div>
-    <div style="margin-top:50px; text-align:center; color:#555">تم الفحص باستخدام الروبوت الذكي v4</div>
+    <h1>تتبع عملية الدخول 🕵️‍♂️</h1>
+    <div style="background:#334155; padding:10px; margin-bottom:20px;">
+        <p>تم محاولة الدخول بالكود: <strong>{code}</strong></p>
+        <p>عدد الروابط المكتشفة: {count}</p>
+    </div>
+    
+    <h2>👇 ماذا يرى الروبوت الآن؟ 👇</h2>
+    <p>قم بتحميل ملف screenshot.png من الـ Artifacts لرؤية الصورة بوضوح</p>
+    
+    <div id="links">{content}</div>
 </body>
 </html>
 """
 
-def deep_scan():
-    print(f"🚀 بدء الزحف بالكود {MY_CODE}...")
+def force_login_scan():
+    print(f"🚀 محاولة اقتحام بالكود {MY_CODE}...")
     
     options = Options()
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--window-size=1920,1080")
+    options.add_argument("--window-size=1280,720") # حجم شاشة موبايل/لابتوب
     
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
     html_cards = ""
-    videos_found = 0
     links_found = 0
 
     try:
-        # 1. الدخول
-        print(f"🌍 فتح الموقع: {TARGET_URL}")
         driver.get(TARGET_URL)
         time.sleep(5)
 
-        # 2. كتابة الكود
+        # --- محاولة الدخول العنيفة ---
         try:
             inputs = driver.find_elements(By.TAG_NAME, "input")
             if inputs:
                 box = inputs[0]
                 box.clear()
                 box.send_keys(MY_CODE)
+                print("✅ تم كتابة الكود.")
+                time.sleep(1)
+                
+                # 1. نجرب Enter الأول
                 box.send_keys(Keys.RETURN)
-                print("✅ تم إدخال الكود، جاري تحميل الصفحة الرئيسية...")
-                time.sleep(8) # انتظار تحميل "المواد"
+                time.sleep(2)
+                
+                # 2. نجرب نضغط على أي زرار "Submit" أو "Button" في الصفحة
+                buttons = driver.find_elements(By.TAG_NAME, "button")
+                inputs_submit = driver.find_elements(By.XPATH, "//input[@type='submit']")
+                
+                # نضغط على كل الأزرار المتاحة (محاولة إجبارية)
+                all_clickables = buttons + inputs_submit
+                if all_clickables:
+                    print(f"Found {len(all_clickables)} buttons, clicking them...")
+                    for btn in all_clickables:
+                        try:
+                            if btn.is_displayed():
+                                btn.click()
+                                print("🖱️ تم الضغط على زرار!")
+                                time.sleep(1)
+                        except:
+                            pass
+                
+                print("⏳ انتظار تحميل الصفحة التالية (10 ثواني)...")
+                time.sleep(10)
             else:
-                print("⚠️ لم أجد خانة للكود، سأفحص الصفحة الحالية.")
-        except Exception as e:
-            print(f"Error Entering Code: {e}")
+                print("⚠️ لم يتم العثور على خانة للكود!")
 
-        # 3. الفحص الشامل (Scanning)
+        except Exception as e:
+            print(f"⚠️ خطأ أثناء الدخول: {e}")
+
+        # --- اللقطة الحاسمة (Screenshot) ---
+        driver.save_screenshot(SCREENSHOT_FILE)
+        print("📸 تم التقاط صورة للوضع الحالي.")
+
+        # --- سحب الروابط ---
         soup = BeautifulSoup(driver.page_source, 'html.parser')
         
-        # --- أولاً: الفيديوهات المباشرة ---
-        for vid in soup.find_all('video'):
-            src = vid.get('src')
-            if src:
-                full_url = urljoin(TARGET_URL, src)
-                videos_found += 1
-                html_cards += f"""
-                <div class="card-video">
-                    <video controls src="{full_url}"></video>
-                    <div class="info">
-                        <h3>🎥 فيديو مباشر {videos_found}</h3>
-                        <a href="{full_url}" class="btn-dl" download target="_blank">⬇️ تحميل الفيديو</a>
-                    </div>
-                </div>
-                """
-
-        # --- ثانياً: الروابط والأقسام (المواد/المدرسين) ---
-        # هنجيب كل الروابط عشان لو هي دي "المواد"
+        # تجميع كل الروابط (عشان نشوف لو "المواد" ظهرت)
         for a in soup.find_all('a', href=True):
             href = a['href']
             text = a.text.strip()
-            full_url = urljoin(TARGET_URL, href)
+            full = urljoin(TARGET_URL, href)
             
-            # فلترة الروابط (نستبعد الروابط الفارغة)
-            if href in ["#", "javascript:void(0)"] or not text:
+            # استبعاد روابط المطور والروابط الفارغة
+            if "elgizawy" in full or not text:
                 continue
 
             links_found += 1
-            
-            # تحديد نوع الأيقونة
-            icon = "📁" # افتراضي (مجلد/مادة)
-            label = "فتح القسم/المادة"
-            btn_color = "#38bdf8"
-            
-            if any(x in full_url for x in ['.mp4', '.mkv', 'drive', 'download']):
-                icon = "🎬"
-                label = "رابط فيديو خارجي"
-                btn_color = "#f472b6"
-            
             html_cards += f"""
-            <div class="card-link">
-                <div class="icon">{icon}</div>
-                <h3>{text if text else 'رابط بدون عنوان'}</h3>
-                <p style="color:#aaa; font-size:0.8em">{full_url}</p>
-                <a href="{full_url}" target="_blank" style="color:{btn_color}">🔗 {label}</a>
+            <div class="card">
+                <a href="{full}" target="_blank">📂 {text}</a>
+                <span style="font-size:0.8em; color:#aaa">{full}</span>
             </div>
             """
-
-        if videos_found == 0 and links_found == 0:
-            html_cards = """
-            <div style="grid-column: 1/-1; text-align:center; padding:50px; background:#334155; border-radius:10px;">
-                <h2>⚠️ لم يتم العثور على محتوى!</h2>
-                <p>تأكد أن الكود 800000 مازال صالحاً، أو أن الصفحة لا تحتاج لضغطات إضافية.</p>
-                <p>سيقوم المطور بتحليل الصفحة بناءً على هذا التقرير.</p>
-            </div>
-            """
-
-        # الحفظ
-        final_html = HTML_TEMPLATE.format(
-            code=MY_CODE, 
-            vid_count=videos_found, 
-            link_count=links_found, 
-            content=html_cards
-        )
-        
-        with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-            f.write(final_html)
             
-        print(f"✅ تم. فيديوهات: {videos_found}, روابط: {links_found}")
+        if links_found == 0:
+            html_cards = "<h3>⚠️ لم نتحرك من صفحة الدخول (انظر الصورة المرفقة)</h3>"
+
+        # حفظ التقرير
+        with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+            f.write(HTML_TEMPLATE.format(code=MY_CODE, count=links_found, content=html_cards))
 
     except Exception as e:
         print(f"❌ Error: {e}")
-        with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-            f.write(f"<h1>Error Occurred: {e}</h1>")
     finally:
         driver.quit()
 
 if __name__ == "__main__":
-    deep_scan()
+    force_login_scan()
