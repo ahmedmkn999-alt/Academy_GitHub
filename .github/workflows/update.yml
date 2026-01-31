@@ -1,7 +1,12 @@
-name: Selenium Scraper (JS Mode)
+name: Ultimate Scraper Fix
 
 on:
   workflow_dispatch:
+    inputs:
+      target_url:
+        description: 'رابط الموقع (اختياري)'
+        required: false
+        default: 'https://thanwyaplus.com/'
 
 permissions:
   contents: write
@@ -18,26 +23,28 @@ jobs:
         with:
           python-version: '3.9'
 
-      # هذه الخطوة مهمة جداً لـ Selenium
-      - name: Install Chrome & Display
+      # خطوة مهمة جداً لمنع انهيار المتصفح
+      - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y xvfb
-          
-      - name: Install Chrome Browser
-        uses: browser-actions/setup-chrome@v1
+          sudo apt-get install -y xvfb google-chrome-stable
 
-      - name: Install Dependencies
+      - name: Install Python Libraries
         run: |
           pip install -r requirements.txt
 
       - name: Run Scraper
-        run: python scraper.py
+        # زيادة حجم الذاكرة لتجنب التهنيج
+        env:
+          DISPLAY: :99
+        run: |
+          Xvfb :99 -screen 0 1920x1080x24 &
+          python scraper.py
 
       - name: Commit Results
         run: |
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
           git add index.html
-          git commit -m "Content Updated via Selenium" || echo "No changes"
+          git commit -m "Update Scraper Result" || echo "No changes"
           git push
