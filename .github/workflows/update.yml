@@ -1,4 +1,4 @@
-name: Stable Network Sniffer
+name: Auto Scraper (Code 800000)
 
 on:
   workflow_dispatch:
@@ -18,15 +18,13 @@ jobs:
         with:
           python-version: '3.9'
 
-      # تسطيب كروم فقط بدون تعقيدات
-      - name: Install Chrome
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
 
       - name: Install Dependencies
-        run: |
-          pip install -r requirements.txt
+        run: pip install selenium webdriver-manager beautifulsoup4 requests
 
       - name: Run Scraper
         run: python scraper.py
@@ -36,5 +34,5 @@ jobs:
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
           git add index.html
-          git commit -m "New Scan Result" || echo "No changes"
+          git commit -m "Done with code 800000" || echo "No changes"
           git push
