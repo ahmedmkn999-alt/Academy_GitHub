@@ -1,10 +1,12 @@
-import undetected_chromedriver as uc
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from webdriver_manager.chrome import ChromeDriverManager
 import time
 import json
-import os
 
-# الرابط الافتراضي
+# الرابط المستهدف
 TARGET_URL = "https://thanwyaplus.com/"
 OUTPUT_FILE = "index.html"
 
@@ -13,10 +15,9 @@ HTML_TEMPLATE = """
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Network Analysis Result</title>
+    <title>Network Sniffer Result</title>
     <style>
         body {{ font-family: monospace; background: #0d1117; color: #c9d1d9; padding: 20px; }}
-        .header {{ border-bottom: 2px solid #238636; padding-bottom: 20px; margin-bottom: 20px; text-align: center; }}
         .item {{ background: #161b22; border: 1px solid #30363d; margin-bottom: 10px; padding: 15px; border-radius: 6px; }}
         .tag {{ padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-left: 10px; font-size: 0.8em; }}
         .video {{ background: #1f6feb; color: white; }}
@@ -25,41 +26,47 @@ HTML_TEMPLATE = """
     </style>
 </head>
 <body>
-    <div class="header"><h1>🕵️‍♂️ تقرير تحليل الشبكة</h1><p>{url}</p></div>
+    <h1 style="text-align:center; color:#238636">تم التحليل بنجاح ✅</h1>
     <div id="content">{content}</div>
 </body>
 </html>
 """
 
-def run_sniffer():
-    print("🚀 بدء التشغيل...")
+def stable_sniffer():
+    print("🚀 بدء التشغيل المستقر...")
     
-    # إعدادات المتصفح لمنع الانهيار
-    options = uc.ChromeOptions()
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
-    options.add_argument('--disable-gpu')
+    # إعدادات المتصفح (مهمة جداً لمنع الانهيار)
+    chrome_options = Options()
+    chrome_options.add_argument("--headless=new") # وضع بدون شاشة حديث
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--window-size=1920,1080")
     
-    # تفعيل مراقبة الشبكة
+    # تفعيل تسجيل الشبكة
     caps = DesiredCapabilities.CHROME
     caps['goog:loggingPrefs'] = {'performance': 'ALL'}
-    options.set_capability('goog:loggingPrefs', {'performance': 'ALL'})
+    for key, value in caps.items():
+        chrome_options.set_capability(key, value)
 
     driver = None
     try:
-        # تشغيل المتصفح
-        driver = uc.Chrome(options=options, version_main=None) # version_main=None ليختار الآلية تلقائياً
+        # تشغيل المتصفح باستخدام المدير الآلي
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=chrome_options)
         
-        print(f"🌍 الدخول إلى: {TARGET_URL}")
+        print(f"🌍 الدخول للموقع: {TARGET_URL}")
         driver.get(TARGET_URL)
         
-        print("⏳ انتظار تحميل البيانات (45 ثانية)...")
-        time.sleep(45)
+        print("⏳ جاري الانتظار 30 ثانية لتحميل الشبكة...")
+        time.sleep(30) # انتظار كافي
 
         # سحب السجلات
         logs = driver.get_log('performance')
         html_content = ""
         unique_urls = set()
+
+        print(f"📦 تم سحب {len(logs)} سجل. جاري الفرز...")
 
         for entry in logs:
             try:
@@ -67,15 +74,18 @@ def run_sniffer():
                 if message['method'] == 'Network.responseReceived':
                     resp = message['params']['response']
                     url = resp['url']
-                    mime = resp['mimeType']
+                    mime = resp.get('mimeType', '')
                     
-                    is_video = any(x in mime for x in ['video', 'mpeg', 'mp4']) or '.m3u8' in url
+                    # فلاتر البحث
+                    is_video = any(x in mime for x in ['video', 'mpeg', 'mp4', 'octet-stream']) or \
+                               any(x in url for x in ['.m3u8', '.mp4', 'bunny', 'vimeo'])
+                    
                     is_api = 'json' in mime and 'api' in url
 
                     if (is_video or is_api) and url not in unique_urls:
                         unique_urls.add(url)
                         tag_class = "video" if is_video else "api"
-                        tag_name = "VIDEO" if is_video else "API/DATA"
+                        tag_name = "MEDIA" if is_video else "API"
                         
                         html_content += f"""
                         <div class="item">
@@ -88,23 +98,23 @@ def run_sniffer():
                 continue
         
         if not html_content:
-            html_content = "<h3 style='text-align:center'>لم يتم رصد ملفات ميديا ظاهرة. قد يحتاج الموقع لتسجيل دخول.</h3>"
+            html_content = "<h3 style='text-align:center'>لم يتم رصد ترافيك فيديو (قد يحتاج تسجيل دخول).</h3>"
 
-        # الحفظ
+        # حفظ الملف
         with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-            f.write(HTML_TEMPLATE.format(url=TARGET_URL, content=html_content))
+            f.write(HTML_TEMPLATE.format(content=html_content))
             
-        print("✅ تم الحفظ بنجاح.")
+        print("✅ تم الحفظ.")
 
     except Exception as e:
         print(f"❌ Error: {e}")
-        # تسجيل الخطأ في الملف لنراه
+        # كتابة الخطأ في الملف لنراه
         with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-            f.write(f"<h1>حدث خطأ أثناء التشغيل:</h1><pre>{e}</pre>")
-            
+            f.write(f"<h1>Error Log:</h1><pre>{e}</pre>")
+
     finally:
         if driver:
             driver.quit()
 
 if __name__ == "__main__":
-    run_sniffer()
+    stable_sniffer()
