@@ -1,4 +1,4 @@
-name: Debug Login (Screenshot)
+name: Force Entry Scraper
 
 on:
   workflow_dispatch:
@@ -29,19 +29,19 @@ jobs:
       - name: Run Scraper
         run: python scraper.py
 
-      # خطوة حفظ الصورة والملف
-      - name: Upload Screenshot & Result
+      # حفظ الصورة والنتيجة
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Debug-Result
+          name: Scan-Results
           path: |
             index.html
-            screenshot.png
+            debug_view.png
 
-      - name: Commit HTML only
+      - name: Commit HTML
         run: |
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
           git add index.html
-          git commit -m "Debug scan complete" || echo "No changes"
+          git commit -m "Forced Entry Result" || echo "No changes"
           git push
