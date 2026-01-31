@@ -3,6 +3,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.action_chains import ActionChains
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
@@ -13,129 +14,162 @@ import os
 TARGET_URL = "https://uploadi.vercel.app/cur.html"
 MY_CODE = "800000"
 OUTPUT_FILE = "index.html"
-SCREENSHOT_FILE = "screenshot.png"
+SCREENSHOT_FILE = "debug_view.png"
 
 HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Academy Login Debug</title>
+    <title>Force Login Result</title>
     <style>
-        body {{ font-family: sans-serif; background: #0f172a; color: #fff; padding: 20px; text-align: center; }}
-        .card {{ background: #1e293b; padding: 15px; margin: 10px auto; max-width: 600px; border-radius: 10px; border: 1px solid #334155; }}
-        a {{ color: #38bdf8; text-decoration: none; font-weight: bold; font-size: 1.2em; display: block; }}
-        h1 {{ color: #fbbf24; }}
-        .debug-img {{ max-width: 100%; border: 2px solid #ef4444; margin-top: 20px; border-radius: 10px; }}
+        body {{ font-family: 'Segoe UI', Tahoma, sans-serif; background: #0f172a; color: #e2e8f0; padding: 20px; }}
+        h1 {{ text-align: center; color: #38bdf8; }}
+        .card {{ background: #1e293b; border: 1px solid #334155; padding: 15px; margin-bottom: 15px; border-radius: 8px; }}
+        a {{ color: #fbbf24; text-decoration: none; font-weight: bold; font-size: 1.1em; display: block; }}
+        .tag {{ background: #0ea5e9; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; margin-left: 10px; }}
+        .debug {{ text-align: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 20px; }}
     </style>
 </head>
 <body>
-    <h1>تتبع عملية الدخول 🕵️‍♂️</h1>
-    <div style="background:#334155; padding:10px; margin-bottom:20px;">
-        <p>تم محاولة الدخول بالكود: <strong>{code}</strong></p>
-        <p>عدد الروابط المكتشفة: {count}</p>
+    <div class="debug">
+        <h1>🕵️‍♂️ نتائج عملية الاقتحام</h1>
+        <p>تم البحث عن: <strong>المواد / المدرسين / الكورسات</strong></p>
+        <p>الحالة: {status}</p>
     </div>
     
-    <h2>👇 ماذا يرى الروبوت الآن؟ 👇</h2>
-    <p>قم بتحميل ملف screenshot.png من الـ Artifacts لرؤية الصورة بوضوح</p>
+    <div id="content">
+        {content}
+    </div>
     
-    <div id="links">{content}</div>
+    <div style="margin-top:30px; text-align:center;">
+        <h3>📸 لقطة لما يراه الروبوت الآن:</h3>
+        <p>حمل ملف debug_view.png لترى الصفحة بعينك</p>
+    </div>
 </body>
 </html>
 """
 
-def force_login_scan():
-    print(f"🚀 محاولة اقتحام بالكود {MY_CODE}...")
+def force_entry_scraper():
+    print(f"🚀 بدء الهجوم بالكود {MY_CODE}...")
     
     options = Options()
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--window-size=1280,720") # حجم شاشة موبايل/لابتوب
+    options.add_argument("--window-size=1366,768")
     
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
     html_cards = ""
-    links_found = 0
+    found_items = 0
+    status_msg = "جاري الفحص..."
 
     try:
         driver.get(TARGET_URL)
         time.sleep(5)
 
-        # --- محاولة الدخول العنيفة ---
+        # --- المرحلة 1: إدخال الكود بالطرق الصعبة ---
         try:
             inputs = driver.find_elements(By.TAG_NAME, "input")
             if inputs:
                 box = inputs[0]
+                print("🔑 تم العثور على الخانة، جاري الحقن...")
+                
+                # 1. مسح وكتابة عادية
                 box.clear()
                 box.send_keys(MY_CODE)
-                print("✅ تم كتابة الكود.")
+                time.sleep(0.5)
+                
+                # 2. حقن جافاسكريبت (للمواقع الحديثة React/Vue)
+                # هذا يجبر الموقع على استشعار الكتابة
+                driver.execute_script("arguments[0].value = arguments[1];", box, MY_CODE)
+                driver.execute_script("arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", box)
+                driver.execute_script("arguments[0].dispatchEvent(new Event('change', { bubbles: true }));", box)
+                
+                print("✅ تم كتابة الكود 800000.")
+                
+                # --- المرحلة 2: الضغط على "أي حاجة" ---
+                # محاولة 1: زر Enter
+                box.send_keys(Keys.RETURN)
                 time.sleep(1)
                 
-                # 1. نجرب Enter الأول
-                box.send_keys(Keys.RETURN)
-                time.sleep(2)
+                # محاولة 2: البحث عن أي زرار في الصفحة والضغط عليه
+                # نضغط على button, input[submit], أو أي div واخد شكل زرار
+                clickables = driver.find_elements(By.CSS_SELECTOR, "button, input[type='submit'], [role='button'], .btn, .button")
                 
-                # 2. نجرب نضغط على أي زرار "Submit" أو "Button" في الصفحة
-                buttons = driver.find_elements(By.TAG_NAME, "button")
-                inputs_submit = driver.find_elements(By.XPATH, "//input[@type='submit']")
-                
-                # نضغط على كل الأزرار المتاحة (محاولة إجبارية)
-                all_clickables = buttons + inputs_submit
-                if all_clickables:
-                    print(f"Found {len(all_clickables)} buttons, clicking them...")
-                    for btn in all_clickables:
+                if clickables:
+                    print(f"🔥 تم العثور على {len(clickables)} زرار، جاري الضغط عليهم...")
+                    for btn in clickables:
                         try:
                             if btn.is_displayed():
-                                btn.click()
-                                print("🖱️ تم الضغط على زرار!")
-                                time.sleep(1)
-                        except:
-                            pass
+                                driver.execute_script("arguments[0].click();", btn) # ضغط إجباري بالجافاسكريبت
+                                time.sleep(0.5)
+                        except: pass
                 
-                print("⏳ انتظار تحميل الصفحة التالية (10 ثواني)...")
+                # محاولة 3: إرسال الفورم مباشرة لو موجودة
+                try:
+                    driver.execute_script("document.forms[0].submit()")
+                    print("🚀 تم إجبار الفورم على الإرسال.")
+                except: pass
+                
+                print("⏳ انتظار فتح الخزنة (10 ثواني)...")
                 time.sleep(10)
+                
             else:
-                print("⚠️ لم يتم العثور على خانة للكود!")
+                print("⚠️ لم أجد خانة للكتابة!")
+                status_msg = "فشل: لم يتم العثور على مربع نص"
 
         except Exception as e:
-            print(f"⚠️ خطأ أثناء الدخول: {e}")
+            print(f"⚠️ خطأ في عملية الدخول: {e}")
 
-        # --- اللقطة الحاسمة (Screenshot) ---
-        driver.save_screenshot(SCREENSHOT_FILE)
-        print("📸 تم التقاط صورة للوضع الحالي.")
-
-        # --- سحب الروابط ---
+        # --- المرحلة 3: سحب الغنائم (المواد/الفيديوهات) ---
+        driver.save_screenshot(SCREENSHOT_FILE) # توثيق اللحظة
         soup = BeautifulSoup(driver.page_source, 'html.parser')
         
-        # تجميع كل الروابط (عشان نشوف لو "المواد" ظهرت)
-        for a in soup.find_all('a', href=True):
-            href = a['href']
-            text = a.text.strip()
-            full = urljoin(TARGET_URL, href)
-            
-            # استبعاد روابط المطور والروابط الفارغة
-            if "elgizawy" in full or not text:
-                continue
+        # تجميع الروابط (المواد/الكورسات)
+        links = soup.find_all('a', href=True)
+        
+        if not links:
+            # لو ملقاش روابط a، ممكن تكون div شغالة كروابط
+            html_cards = "<h3 style='color:orange; text-align:center'>⚠️ الصفحة تبدو فارغة أو مازالت في الدخول. (انظر الصورة)</h3>"
+            status_msg = "فشل في الدخول"
+        else:
+            status_msg = "تم الدخول بنجاح ✅"
+            for a in links:
+                href = a['href']
+                text = a.text.strip() or "رابط بدون عنوان"
+                full_url = urljoin(TARGET_URL, href)
+                
+                # فلترة الروابط المهمة فقط
+                if "javascript" in href or href == "#" or not text: continue
+                
+                found_items += 1
+                icon = "📁" # مجلد (مادة/مدرس)
+                btn_txt = "فتح القسم"
+                
+                # لو فيديو مباشر
+                if any(x in full_url.lower() for x in ['.mp4', 'video', 'watch']):
+                    icon = "🎥"
+                    btn_txt = "مشاهدة/تحميل"
 
-            links_found += 1
-            html_cards += f"""
-            <div class="card">
-                <a href="{full}" target="_blank">📂 {text}</a>
-                <span style="font-size:0.8em; color:#aaa">{full}</span>
-            </div>
-            """
-            
-        if links_found == 0:
-            html_cards = "<h3>⚠️ لم نتحرك من صفحة الدخول (انظر الصورة المرفقة)</h3>"
+                html_cards += f"""
+                <div class="card">
+                    <span class="tag">{icon}</span>
+                    <a href="{full_url}" target="_blank">{text}</a>
+                    <div style="margin-top:5px; font-size:0.9em; color:#94a3b8">{full_url}</div>
+                </div>
+                """
 
-        # حفظ التقرير
+        # الحفظ
         with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-            f.write(HTML_TEMPLATE.format(code=MY_CODE, count=links_found, content=html_cards))
-
+            f.write(HTML_TEMPLATE.format(status=status_msg, content=html_cards))
+            
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"❌ Fatal Error: {e}")
+        with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+            f.write(f"<h1>Error: {e}</h1>")
     finally:
         driver.quit()
 
 if __name__ == "__main__":
-    force_login_scan()
+    force_entry_scraper()
