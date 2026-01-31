@@ -1,4 +1,4 @@
-name: Ultimate Explorer (800000)
+name: Debug Login (Screenshot)
 
 on:
   workflow_dispatch:
@@ -26,13 +26,22 @@ jobs:
       - name: Install Dependencies
         run: pip install selenium webdriver-manager beautifulsoup4
 
-      - name: Run Deep Scan
+      - name: Run Scraper
         run: python scraper.py
 
-      - name: Commit Results
+      # خطوة حفظ الصورة والملف
+      - name: Upload Screenshot & Result
+        uses: actions/upload-artifact@v4
+        with:
+          name: Debug-Result
+          path: |
+            index.html
+            screenshot.png
+
+      - name: Commit HTML only
         run: |
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
           git add index.html
-          git commit -m "Explored with Code 800000" || echo "No changes"
+          git commit -m "Debug scan complete" || echo "No changes"
           git push
