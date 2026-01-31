@@ -1,13 +1,17 @@
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin
 import time
-import json
 
-# الرابط المستهدف
-TARGET_URL = "https://thanwyaplus.com/"
+# --- الإعدادات ---
+TARGET_URL = "https://uploadi.vercel.app/cur.html"
+# الكود بتاعك محطوط هنا جاهز 👇
+MY_CODE = "800000" 
 OUTPUT_FILE = "index.html"
 
 HTML_TEMPLATE = """
@@ -15,106 +19,101 @@ HTML_TEMPLATE = """
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Network Sniffer Result</title>
+    <title>Course Videos</title>
     <style>
-        body {{ font-family: monospace; background: #0d1117; color: #c9d1d9; padding: 20px; }}
-        .item {{ background: #161b22; border: 1px solid #30363d; margin-bottom: 10px; padding: 15px; border-radius: 6px; }}
-        .tag {{ padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-left: 10px; font-size: 0.8em; }}
-        .video {{ background: #1f6feb; color: white; }}
-        .api {{ background: #d29922; color: black; }}
-        .url {{ color: #58a6ff; display: block; margin-top: 5px; word-break: break-all; }}
+        body {{ font-family: sans-serif; background: #0f172a; color: #fff; padding: 20px; text-align: center; }}
+        .card {{ background: #1e293b; border: 1px solid #334155; padding: 20px; margin: 20px auto; max-width: 600px; border-radius: 10px; }}
+        .btn {{ display: block; background: #2563eb; color: white; padding: 12px; margin-top: 15px; text-decoration: none; border-radius: 6px; font-weight: bold; }}
+        .btn:hover {{ background: #1d4ed8; }}
+        h1 {{ color: #fbbf24; }}
     </style>
 </head>
 <body>
-    <h1 style="text-align:center; color:#238636">تم التحليل بنجاح ✅</h1>
+    <h1>نتائج الكود: {code} 🔓</h1>
     <div id="content">{content}</div>
 </body>
 </html>
 """
 
-def stable_sniffer():
-    print("🚀 بدء التشغيل المستقر...")
+def run_bot():
+    print(f"🚀 تشغيل الروبوت بالكود {MY_CODE}...")
     
-    # إعدادات المتصفح (مهمة جداً لمنع الانهيار)
-    chrome_options = Options()
-    chrome_options.add_argument("--headless=new") # وضع بدون شاشة حديث
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--window-size=1920,1080")
+    options = Options()
+    options.add_argument("--headless=new")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--window-size=1920,1080")
     
-    # تفعيل تسجيل الشبكة
-    caps = DesiredCapabilities.CHROME
-    caps['goog:loggingPrefs'] = {'performance': 'ALL'}
-    for key, value in caps.items():
-        chrome_options.set_capability(key, value)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    html_content = ""
 
-    driver = None
     try:
-        # تشغيل المتصفح باستخدام المدير الآلي
-        service = Service(ChromeDriverManager().install())
-        driver = webdriver.Chrome(service=service, options=chrome_options)
-        
         print(f"🌍 الدخول للموقع: {TARGET_URL}")
         driver.get(TARGET_URL)
+        time.sleep(5) # انتظار فتح الصفحة
+
+        # --- كتابة الكود ---
+        try:
+            print(f"🔑 جاري كتابة الكود...")
+            inputs = driver.find_elements(By.TAG_NAME, "input")
+            if inputs:
+                box = inputs[0]
+                box.clear()
+                box.send_keys(MY_CODE) # كتابة 800000
+                box.send_keys(Keys.RETURN)
+                print("✅ تم الإدخال، جاري انتظار الفيديوهات...")
+                time.sleep(8) # ندي وقت للفيديو يحمل
+            else:
+                print("⚠️ لم أجد مكان للكتابة، سأفحص الصفحة كما هي.")
+        except Exception as e:
+            print(f"⚠️ مشكلة بسيطة في الكتابة: {e}")
+
+        # --- سحب الفيديوهات ---
+        soup = BeautifulSoup(driver.page_source, 'html.parser')
+        found = False
         
-        print("⏳ جاري الانتظار 30 ثانية لتحميل الشبكة...")
-        time.sleep(30) # انتظار كافي
-
-        # سحب السجلات
-        logs = driver.get_log('performance')
-        html_content = ""
-        unique_urls = set()
-
-        print(f"📦 تم سحب {len(logs)} سجل. جاري الفرز...")
-
-        for entry in logs:
-            try:
-                message = json.loads(entry['message'])['message']
-                if message['method'] == 'Network.responseReceived':
-                    resp = message['params']['response']
-                    url = resp['url']
-                    mime = resp.get('mimeType', '')
-                    
-                    # فلاتر البحث
-                    is_video = any(x in mime for x in ['video', 'mpeg', 'mp4', 'octet-stream']) or \
-                               any(x in url for x in ['.m3u8', '.mp4', 'bunny', 'vimeo'])
-                    
-                    is_api = 'json' in mime and 'api' in url
-
-                    if (is_video or is_api) and url not in unique_urls:
-                        unique_urls.add(url)
-                        tag_class = "video" if is_video else "api"
-                        tag_name = "MEDIA" if is_video else "API"
-                        
-                        html_content += f"""
-                        <div class="item">
-                            <span class="tag {tag_class}">{tag_name}</span>
-                            <span style="color:#8b949e">{mime}</span>
-                            <a href="{url}" class="url" target="_blank">{url}</a>
-                        </div>
-                        """
-            except:
-                continue
+        # فيديوهات مباشرة
+        for vid in soup.find_all('video'):
+            src = vid.get('src')
+            if src:
+                full = urljoin(TARGET_URL, src)
+                found = True
+                html_content += f"""
+                <div class="card">
+                    <h3>🎥 محاضرة فيديو</h3>
+                    <video controls src="{full}" width="100%"></video>
+                    <a href="{full}" class="btn" download>⬇️ تحميل الفيديو</a>
+                </div>
+                """
         
-        if not html_content:
-            html_content = "<h3 style='text-align:center'>لم يتم رصد ترافيك فيديو (قد يحتاج تسجيل دخول).</h3>"
+        # روابط
+        for a in soup.find_all('a', href=True):
+            href = a['href']
+            full = urljoin(TARGET_URL, href)
+            if "mp4" in full or "drive" in full:
+                found = True
+                html_content += f"""
+                <div class="card">
+                    <h3>🔗 رابط خارجي</h3>
+                    <a href="{full}" class="btn" target="_blank">فتح الرابط</a>
+                </div>
+                """
 
-        # حفظ الملف
+        if not found:
+            html_content = "<h3>⚠️ لم تظهر فيديوهات. هل الكود 800000 صحيح؟</h3>"
+
         with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-            f.write(HTML_TEMPLATE.format(content=html_content))
+            f.write(HTML_TEMPLATE.format(code=MY_CODE, content=html_content))
             
-        print("✅ تم الحفظ.")
+        print("✅ تم الانتهاء.")
 
     except Exception as e:
         print(f"❌ Error: {e}")
-        # كتابة الخطأ في الملف لنراه
         with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-            f.write(f"<h1>Error Log:</h1><pre>{e}</pre>")
-
+            f.write(f"<h1>Error: {e}</h1>")
     finally:
-        if driver:
-            driver.quit()
+        driver.quit()
 
 if __name__ == "__main__":
-    stable_sniffer()
+    run_bot()
